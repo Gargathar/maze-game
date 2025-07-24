@@ -26,9 +26,9 @@ class Grid:
 
 		self.grid = []
 
-		for i in range(11):
+		for i in range(self.GRIDLEN+1):
 			self.grid.append([])
-			for j in range(11):
+			for j in range(self.GRIDLEN+1):
 				
 				temp_cell = Cell(i,j)
 				self.grid[i].append(temp_cell)

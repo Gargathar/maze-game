@@ -1,4 +1,4 @@
-
+from random import shuffle
 from math import floor
 
 class Cell:
@@ -25,6 +25,7 @@ class Grid:
 		self.GRIDLEN = 11 # this assumes the grid is a uniform square
 
 		self.grid = []
+		self.dir = [[1,0],[-1,0],[0,1],[0,-1]]
 
 		for i in range(self.GRIDLEN):
 			self.grid.append([])

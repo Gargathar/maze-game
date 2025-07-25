@@ -21,15 +21,15 @@ class Chunk:
 
 	def __init__(self):
 
-		self.CHUNKLEN = 30 # this assumes the grid is a uniform square
+		self.CHUNKLEN = 31 # this assumes the grid is a uniform square
 		mid = self.CHUNKLEN//2
 
 		self.dir = [[1,0],[-1,0],[0,1],[0,-1]]
 		self.grid = []
 
-		for i in range(self.CHUNKLEN+1):
+		for i in range(self.CHUNKLEN):
 			self.grid.append([])
-			for j in range(self.CHUNKLEN+1):
+			for j in range(self.CHUNKLEN):
 				
 				temp_cell = Cell(i,j)
 				self.grid[i].append(temp_cell)
@@ -40,10 +40,10 @@ class Chunk:
 				elif i == mid and j == 0:
 					temp_cell.bound = "west"
 				
-				elif i == self.CHUNKLEN and j == mid:
+				elif i == self.CHUNKLEN-1 and j == mid:
 					temp_cell.bound = "south"
 				
-				elif i == mid and j == self.CHUNKLEN:
+				elif i == mid and j == self.CHUNKLEN-1:
 					temp_cell.bound = "east"
 
 	

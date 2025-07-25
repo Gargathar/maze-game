@@ -1,5 +1,7 @@
 import wasabi2d as w2d
 import time
+
+from maze_as_a_whole import Maze
 # Create a new scene
 scene = w2d.Scene(width=800, height=600, background=(0.9, 0.9, 1.0), title="My Scene")
 animate = w2d.animate 
@@ -8,6 +10,9 @@ animate = w2d.animate
 class Player:
     
     def __init__(self):
+
+        self.maze = Maze()
+        self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2]
         
         # Create a new square sprite for the Player
         self.sprite = scene.layers[1].add_rect(

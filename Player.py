@@ -35,14 +35,17 @@ class Player:
 		)
 
 		# Set flags for key presses
-		self.up_pressed = False
-		self.down_pressed = False
-		self.left_pressed = False
-		self.right_pressed = False
-		self.space_pressed = False
+		self.up_pressed:bool = False
+		self.down_pressed:bool = False
+		self.left_pressed:bool = False
+		self.right_pressed:bool = False
+		self.space_pressed:bool = False
 
 		self.attacking = 0  
+
 		self.direction = 0
+		self.last_ver_move_up:bool = True
+		self.last_hor_move_right:bool = True
 
 
 
@@ -72,23 +75,35 @@ class Player:
 					tile_set.add(tile)
 
 
-
+	
 	# Define movement functions
 	def move_up(self):
 		self.sprite.y -= 10
 		self.direction = 90
 
+		scene.camera.pos = player.sprite.pos
+		self.last_ver_move_up = True
+
 	def move_down(self):
 		self.sprite.y += 10
 		self.direction = 270
+
+		scene.camera.pos = player.sprite.pos
+		self.last_ver_move_up = False
 
 	def move_left(self):
 		self.sprite.x -= 10
 		self.direction = 0
 
+		scene.camera.pos = player.sprite.pos
+		self.last_hor_move_right = False
+
 	def move_right(self):
 		self.sprite.x += 10
 		self.direction = 180
+
+		scene.camera.pos = player.sprite.pos
+		self.last_hor_move_right = True
 
 
 
@@ -105,7 +120,7 @@ class Player:
 	def done_swing(self):
 		self.attacking = 0
 		self.Sword.delete()
-		if self.direction == 0:  # Player is facing left
+		if self.direction == 180:  # Player is facing left
 			self.Sword.pos = (self.sprite.pos - (25, 0))
 			animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=self.done_swing)
 			
@@ -113,7 +128,7 @@ class Player:
 			self.Sword.pos = (self.sprite.pos + (0, 25))
 			animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=self.done_swing)
 			
-		elif self.direction == 180:  # Player is facing right
+		elif self.direction == 0:  # Player is facing right
 			self.Sword.pos = (self.sprite.pos + (25, 0))
 			animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=self.done_swing) 
 			
@@ -156,6 +171,7 @@ def on_key_down(key):
 def on_key_up(key):
 	if player.attacking == 1:
 		pass
+
 	elif player.attacking == 0:
 		if key == w2d.keys.UP:
 			player.up_pressed = False
@@ -165,11 +181,42 @@ def on_key_up(key):
 			player.left_pressed = False
 		elif key == w2d.keys.RIGHT:
 			player.right_pressed = False
+
+		
+
+		if player.sprite.x % TILE_LEN != 0:
+			for _ in range(4):
+				scene.camera.pos = player.sprite.pos
+				if player.last_hor_move_right == True:
+					player.sprite.x += 10
+				else:
+					player.sprite.x -= 10
+
+				if player.sprite.x % TILE_LEN == 0:
+					break
+				scene.camera.pos = player.sprite.pos
+		
+		if player.sprite.y % TILE_LEN != 0:
+			for _ in range(4):
+				scene.camera.pos = player.sprite.pos
+				if player.last_ver_move_up == True:
+					player.sprite.y -= 10
+				else:
+					player.sprite.y += 10
+
+				if player.sprite.y % TILE_LEN == 0:
+					break
+				scene.camera.pos = player.sprite.pos
+
+
+	
+
 	else:
 		print(player.attacking)
+	
 
 def update():
-
+	scene.camera.pos = player.sprite.pos
 	if player.up_pressed:
 		player.move_up()
 	if player.down_pressed:

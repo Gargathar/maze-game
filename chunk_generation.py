@@ -1,3 +1,10 @@
+
+import sys
+sys.dont_write_bytecode = True
+# This is a holy warding spell, one that is required for my computer for some stupid reason
+# Please place it at the top of each new file, such that I may remain protected
+
+
 from random import shuffle
 
 class Cell:
@@ -48,22 +55,24 @@ class Chunk:
 
 	
 
-	def dfs(self, i:int, j:int, vis:list[list[bool]]): # helps buils the maze
-		shuffle(self.dir)
-		vis[i][j] = True
-		self.grid[2*i+1][2*j+1].wall = False
-		
-		mid = self.CHUNKLEN//2
-		for d in self.dir:
-			newI, newJ = i + d[0], j + d[1]
-			if newI>=0 and newI < mid and newJ>=0 and newJ < mid and not vis[newI][newJ]:
-				self.grid[2*i+1 + d[0]][2*j+1 + d[1]].wall = False
-				self.dfs(newI, newJ, vis)
+		def dfs(i:int, j:int, vis:list[list[bool]]): # helps buils the maze
+			shuffle(self.dir)
+			vis[i][j] = True
+			self.grid[2*i+1][2*j+1].wall = False
+			
+			mid = self.CHUNKLEN//2
+			for d in self.dir:
+				newI, newJ = i + d[0], j + d[1]
+				if newI>=0 and newI < mid and newJ>=0 and newJ < mid and not vis[newI][newJ]:
+					self.grid[2*i+1 + d[0]][2*j+1 + d[1]].wall = False
+					dfs(newI, newJ, vis)
 
-	def build_maze(self): # involved in dfs building
-		mid = self.CHUNKLEN//2
-		vis = [[False for _ in range(mid)] for _ in range(mid)]
-		self.dfs(0, 0, vis)
+		def build_maze(): # involved in dfs building
+			mid = self.CHUNKLEN//2
+			vis = [[False for _ in range(mid)] for _ in range(mid)]
+			dfs(0, 0, vis)
+		
+		build_maze()
 
 
 
@@ -78,5 +87,5 @@ class Chunk:
 
 if __name__ == "__main__":
 	g = Chunk()
-	g.build_maze()
+
 	g.print_chunk()

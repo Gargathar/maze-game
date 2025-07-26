@@ -1,9 +1,18 @@
+
+import sys
+sys.dont_write_bytecode = True
+# This is a holy warding spell, one that is required for my computer for some stupid reason
+# Please place it at the top of each new file, such that I may remain protected
+
+
 import wasabi2d as w2d
 import time
 
+from chunk_generation import Chunk, Cell
 from maze_as_a_whole import Maze
+
 # Create a new scene
-scene = w2d.Scene(width=800, height=600, background=(0.9, 0.9, 1.0), title="My Scene")
+scene = w2d.Scene(width=800, height=600, background=(0, 0, 0), title="My Scene")
 animate = w2d.animate 
 
 TILE_LEN = 50
@@ -12,8 +21,10 @@ class Player:
 	
 	def __init__(self):
 
-		self.maze = Maze(TILE_LEN)
+		self.maze = Maze()
 		self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2]
+
+		self.rendered_room_stuff:list[set[Cell]] = []
 		
 		# Create a new square sprite for the Player
 		self.sprite = scene.layers[1].add_rect(
@@ -33,10 +44,34 @@ class Player:
 		self.attacking = 0  
 		self.direction = 0
 
-	def render_chunk(self, map_y, map_x):
-		chunk = self.map[map_y][map_x]
-		pix_start_y = self.center_chunk.CHUNKLEN * self.TILE_LEN * (map_y-self.center[0])
-		pix_start_x = self.center_chunk.CHUNKLEN * self.TILE_LEN * (map_y-self.center[1])
+
+
+	def render_chunk(self, map_y, map_x): 
+		"""
+		Here so that there's only one scene to render, despite multiple layers
+		
+		Single hunk rendering starts at (0,0), then builds right and down
+		multi-chunk rendering starts some offset (seen below), then does the same
+		"""
+		chunk:Chunk = self.maze.map[map_y][map_x]
+		pix_start_y = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_y-self.maze.center[0])
+		pix_start_x = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_y-self.maze.center[1])
+
+		self.rendered_room_stuff.append(set())
+		tile_set = self.rendered_room_stuff[-1]
+
+		for i in range(chunk.CHUNKLEN):
+			for j in range(chunk.CHUNKLEN):
+				if chunk.grid[i][j].wall == True:
+					tile = scene.layers[0].add_rect(
+					width=TILE_LEN,
+					height=TILE_LEN,
+					pos=(pix_start_x + (TILE_LEN*j), pix_start_y + (TILE_LEN*i)),
+					color=(1, 1, 1),  # White
+					)
+					tile_set.add(tile)
+
+
 
 	# Define movement functions
 	def move_up(self):
@@ -59,7 +94,7 @@ class Player:
 
 	# Remove the sword after the attack
 	def attack(self):
-		self.Sword = scene.layers[0].add_rect(
+		self.Sword = scene.layers[2].add_rect(
 		width=10,
 		height=50, # should probably re-write in terms of TILE_LEN
 		pos=(400, 300),
@@ -134,6 +169,7 @@ def on_key_up(key):
 		print(player.attacking)
 
 def update():
+
 	if player.up_pressed:
 		player.move_up()
 	if player.down_pressed:
@@ -149,4 +185,5 @@ def update():
 # Run the scene
 
 update()
+player.render_chunk(15,15)
 w2d.run()

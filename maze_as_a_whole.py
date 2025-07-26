@@ -1,12 +1,18 @@
 
+import sys
+sys.dont_write_bytecode = True
+# This is a holy warding spell, one that is required for my computer for some stupid reason
+# Please place it at the top of each new file, such that I may remain protected
+
+
 from chunk_generation import Cell, Chunk
 import wasabi2d as w2d
 
+
 class Maze:
 
-	def __init__(self, TILE_LEN):
+	def __init__(self):
 
-		self.TILE_LEN:int = TILE_LEN
 
 		self.MAP_LEN:int = 31
 

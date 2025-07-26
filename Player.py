@@ -1,4 +1,4 @@
-
+import math
 import sys
 sys.dont_write_bytecode = True
 # This is a holy warding spell, one that is required for my computer for some stupid reason
@@ -75,20 +75,30 @@ class Player:
 
 	# Define movement functions
 	def move_up(self):
-		self.sprite.y -= 10
-		self.direction = 90
+		new_y = self.sprite.y - 10
+		if not self.check_collision(self.sprite.x, new_y):
+			self.sprite.y = new_y
+			self.direction = 90
 
 	def move_down(self):
-		self.sprite.y += 10
-		self.direction = 270
+		new_y = self.sprite.y + 10
+		if not self.check_collision(self.sprite.x, new_y):
+			self.sprite.y = new_y
+			self.direction = 270
+		
 
 	def move_left(self):
-		self.sprite.x -= 10
-		self.direction = 0
+		new_x = self.sprite.x - 10
+		if not self.check_collision(new_x, self.sprite.y):
+			self.sprite.x = new_x
+			self.direction = 0
 
 	def move_right(self):
-		self.sprite.x += 10
-		self.direction = 180
+		new_x = self.sprite.x + 10
+		if not self.check_collision(new_x, self.sprite.y):
+			self.sprite.x = new_x
+			self.direction = 180
+		
 
 
 
@@ -120,14 +130,27 @@ class Player:
 		elif self.direction == 270:  # Player is facing down
 			self.Sword.pos = (self.sprite.pos - (0, 25))
 			animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=self.done_swing)
-			
+		self.attacking = 1
 		# Position the sword at the sprite's position
 		# for i in range(6):
 		#     Sword.angle += (6)
 		#     time.sleep(0.1)
 		# time.sleep(5)
 		# Remove the sword after the attack
-		self.attacking = 0  # Reset attacking state
+	def check_collision(self, new_x, new_y):
+		
+		
+    	
+		
+		tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
+		tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
+		chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+		cell = chunk.grid[tile_y][tile_x]
+
+		if not cell.wall:
+			return True
+		else:
+			return False
 
 
 player = Player()

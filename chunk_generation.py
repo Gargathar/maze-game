@@ -21,11 +21,11 @@ class Chunk:
 
 	def __init__(self):
 
-		self.CHUNKLEN = 31 # this assumes the grid is a uniform square
-		mid = self.CHUNKLEN//2
+		self.CHUNKLEN:int = 31 # this assumes the grid is a uniform square
+		mid:int = self.CHUNKLEN//2
 
-		self.dir = [[1,0],[-1,0],[0,1],[0,-1]]
-		self.grid = []
+		self.dir:list = [[1,0],[-1,0],[0,1],[0,-1]]
+		self.grid:list = []
 
 		for i in range(self.CHUNKLEN):
 			self.grid.append([])

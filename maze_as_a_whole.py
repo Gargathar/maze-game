@@ -1,5 +1,5 @@
 
-from game_proof_of_concept import Cell, Chunk
+from chunk_generation import Cell, Chunk
 
 
 class Maze:

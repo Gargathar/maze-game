@@ -195,39 +195,34 @@ class Player:
 
 	# Remove the sword after the attack
 	def attack(self):
-		self.Sword = scene.layers[2].add_rect(
+		self.Sword = scene.layers[0].add_rect(
 		width=10,
 		height=50, # should probably re-write in terms of TILE_LEN
 		pos=(400, 300),
-		color=(0, 0, 0),
+		color=(1, 0, 1),  # Set the rotation based on the player's direction
 		# Black color for the sword
 		)
 
-	def done_swing(self):
-		self.attacking = 0
-		self.Sword.delete()
-		if self.direction == 180:  # Player is facing left
-			self.Sword.pos = (self.sprite.pos - (25, 0))
-			animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=self.done_swing)
-			
-		elif self.direction == 90:  # Player is facing up
-			self.Sword.pos = (self.sprite.pos + (0, 25))
-			animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=self.done_swing)
-			
-		elif self.direction == 0:  # Player is facing right
-			self.Sword.pos = (self.sprite.pos + (25, 0))
-			animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=self.done_swing) 
-			
-		elif self.direction == 270:  # Player is facing down
-			self.Sword.pos = (self.sprite.pos - (0, 25))
-			animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=self.done_swing)
+		def on_animation_finished():
+			self.Sword.delete()
+			self.attacking = 0
+
 		self.attacking = 1
-		# Position the sword at the sprite's position
-		# for i in range(6):
-		#     Sword.angle += (6)
-		#     time.sleep(0.1)
-		# time.sleep(5)
-		# Remove the sword after the attack
+		if self.Sword.angle == 180:  # Player is facing left
+			self.Sword.pos = (self.sprite.pos - (25, 0))
+			animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=on_animation_finished)
+			
+		elif self.Sword.angle == 90:  # Player is facing up
+			self.Sword.pos = (self.sprite.pos + (0, 25))
+			animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=on_animation_finished)
+			
+		elif self.Sword.angle == 0:  # Player is facing right
+			self.Sword.pos = (self.sprite.pos + (25, 0))
+			animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=on_animation_finished) 
+			
+		elif self.Sword.angle == 270:  # Player is facing down
+			self.Sword.pos = (self.sprite.pos - (0, 25))
+			animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=on_animation_finished)
 
 	def check_collision(self, new_x, new_y):
 		"""

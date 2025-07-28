@@ -79,11 +79,9 @@ class Player:
 	def find_current_tile(self):
 		print(self.sprite.x / 50)
 		print(self.sprite.y / 50)
-		if self.sprite.x % 50 == 0:
-			tile_x = int(round(self.sprite.x / 50))
-		if self.sprite.y % 50 == 0:
-			tile_y = int(round(self.sprite.y / 50))
-		
+		tile_x = int(round(self.sprite.x / 50))
+		tile_y = int(round(self.sprite.y / 50))
+	
 		print(f"called | {self.sprite.x} -> {tile_x} | {self.sprite.y} -> {tile_y} |")
 		
 		return [tile_x, tile_y]

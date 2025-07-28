@@ -180,19 +180,19 @@ class Player:
 	
 	def move_up(self):
 		if self.sprite.y % TILE_LEN == 0:
-            tile_coords:list[int] = self.find_current_tile()
-            tile_coords[0] -= 1
-            current_chunk_y_start = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
-            print(tile_coords,current_chunk_y_start)
+			tile_coords:list[int] = self.find_current_tile()
+			tile_coords[0] -= 1
+			current_chunk_y_start = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
+			print(tile_coords,current_chunk_y_start)
 
-            if tile_coords[0] < current_chunk_y_start:
-                self.update_map_position(-1, 0)
+			if tile_coords[0] < current_chunk_y_start:
+				self.update_map_position(-1, 0)
 
 				
 
-            chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-            if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-                return
+			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+				return
 
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -202,33 +202,33 @@ class Player:
 		# 	color=(1, 0, 0, 0.3),  # Red with transparency
 		# )
 		
-        new_y = self.sprite.y - 10
+		new_y = self.sprite.y - 10
 		
-        player.attacking = 1
-        self.sprite.y = new_y
-        self.direction = 90
-        player.attacking = 0
+		player.attacking = 1
+		self.sprite.y = new_y
+		self.direction = 90
+		player.attacking = 0
 
-        scene.camera.pos = player.sprite.pos
-        self.last_ver_move_up = True
-
-
-
-    def move_down(self):
-
-        if self.sprite.y % TILE_LEN == 0:
-	        tile_coords:list[int] = self.find_current_tile()
-            tile_coords[0] += 1
-            current_chunk_y_end = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
-            print(tile_coords,current_chunk_y_end)
-
-            if tile_coords[0] > current_chunk_y_end: # might need to change to a >=, but this works so it's fine
-                self.update_map_position(1, 0)
+		scene.camera.pos = player.sprite.pos
+		self.last_ver_move_up = True
 
 
-            chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-            if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-                return
+
+	def move_down(self):
+
+		if self.sprite.y % TILE_LEN == 0:
+			tile_coords:list[int] = self.find_current_tile()
+			tile_coords[0] += 1
+			current_chunk_y_end = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
+			print(tile_coords,current_chunk_y_end)
+
+			if tile_coords[0] > current_chunk_y_end: # might need to change to a >=, but this works so it's fine
+				self.update_map_position(1, 0)
+
+
+			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+				return
 
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -238,33 +238,33 @@ class Player:
 		# 	color=(1, 0, 0, 0.3),  # Red with transparency
 		# )
 		
-        new_y = self.sprite.y + 10
+		new_y = self.sprite.y + 10
 
-        player.attacking = 1
-        self.sprite.y = new_y
-        self.direction = 270
-        player.attacking = 0
+		player.attacking = 1
+		self.sprite.y = new_y
+		self.direction = 270
+		player.attacking = 0
 		
 
-        scene.camera.pos = player.sprite.pos
-        self.last_ver_move_up = False
+		scene.camera.pos = player.sprite.pos
+		self.last_ver_move_up = False
 
 
 
-    def move_left(self):
+	def move_left(self):
 
-        if self.sprite.x % TILE_LEN == 0:
-            tile_coords:list[int] = self.find_current_tile()
-            tile_coords[1] -= 1
-            current_chunk_x_start = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
-            print(tile_coords,current_chunk_x_start)
+		if self.sprite.x % TILE_LEN == 0:
+			tile_coords:list[int] = self.find_current_tile()
+			tile_coords[1] -= 1
+			current_chunk_x_start = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
+			print(tile_coords,current_chunk_x_start)
 
-            if tile_coords[1] < current_chunk_x_start:
-	            self.update_map_position(0, -1)
+			if tile_coords[1] < current_chunk_x_start:
+				self.update_map_position(0, -1)
 
 
-            chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-            if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
 				print("ow my liver")
 				return
 			

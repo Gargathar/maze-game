@@ -105,8 +105,10 @@ class Player:
 
 		new_y = self.sprite.y - 10
 		if not self.check_collision(self.sprite.x, new_y):
+			player.attacking = 1
 			self.sprite.y = new_y
 			self.direction = 90
+			player.attacking = 0
 
 		scene.camera.pos = player.sprite.pos
 		self.last_ver_move_up = True
@@ -114,8 +116,10 @@ class Player:
 	def move_down(self):
 		new_y = self.sprite.y + 10
 		if not self.check_collision(self.sprite.x, new_y):
+			player.attacking = 1
 			self.sprite.y = new_y
 			self.direction = 270
+			player.attacking = 0
 		
 
 		scene.camera.pos = player.sprite.pos
@@ -124,8 +128,10 @@ class Player:
 	def move_left(self):
 		new_x = self.sprite.x - 10
 		if not self.check_collision(new_x, self.sprite.y):
+			player.attacking = 1
 			self.sprite.x = new_x
 			self.direction = 0
+			player.attacking = 0
 
 		scene.camera.pos = player.sprite.pos
 		self.last_hor_move_right = False
@@ -133,8 +139,10 @@ class Player:
 	def move_right(self):
 		new_x = self.sprite.x + 10
 		if not self.check_collision(new_x, self.sprite.y):
+			player.attacking = 1
 			self.sprite.x = new_x
 			self.direction = 180
+			player.attacking = 0
 		
 
 		scene.camera.pos = player.sprite.pos
@@ -179,16 +187,28 @@ class Player:
 		# Remove the sword after the attack
 
 	def check_collision(self, new_x, new_y):
-		pass
-		
-    	
-		
+		"""
+		Checks whether the player's next move will result in a collision with a wall.
+
+		Args:
+			new_x (int): The new x-coordinate of the player.
+			new_y (int): The new y-coordinate of the player.
+
+		Returns:
+			bool: True if there is a collision, False otherwise.
+		"""
+		# Calculate the tile coordinates of the player's next move
 		# tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
 		# tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
+		
+		# # Get the chunk that the player is currently in
 		# chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+		
+		# # Get the cell that the player is trying to move into
 		# cell = chunk.grid[tile_y][tile_x]
-
-		# if not cell.wall:
+		
+		# # Check if the cell is a wall
+		# if cell.wall:
 		# 	return True
 		# else:
 		# 	return False
@@ -238,10 +258,10 @@ def on_key_up(key):
 				scene.camera.pos = player.sprite.pos
 				if player.last_hor_move_right == True:
 					player.move_right()
-					time.sleep(1/60)
+					#time.sleep(1/60)
 				else:
 					player.move_left()
-					time.sleep(1/60)
+					#time.sleep(1/60)
 
 				if player.sprite.x % TILE_LEN == 0:
 					break
@@ -252,10 +272,10 @@ def on_key_up(key):
 				scene.camera.pos = player.sprite.pos
 				if player.last_ver_move_up == True:
 					player.move_up()
-					time.sleep(1/60)
+					#time.sleep(1/60)
 				else:
 					player.move_down()
-					time.sleep(1/60)
+					#time.sleep(1/60)
 
 				if player.sprite.y % TILE_LEN == 0:
 					break
@@ -270,14 +290,19 @@ def on_key_up(key):
 
 def update():
 	scene.camera.pos = player.sprite.pos
-	if player.up_pressed:
-		player.move_up()
-	if player.down_pressed:
-		player.move_down()
-	if player.left_pressed:
-		player.move_left()
-	if player.right_pressed:
-		player.move_right()
+	if player.attacking == 1:
+		pass
+	elif player.attacking == 0:
+		if player.up_pressed:
+			player.move_up()
+		if player.down_pressed:
+			player.move_down()
+		if player.left_pressed:
+			player.move_left()
+		if player.right_pressed:
+			player.move_right()
+	else:
+		pass
 	w2d.clock.schedule(update, 1/60)
 
 

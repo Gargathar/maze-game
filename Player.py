@@ -98,9 +98,9 @@ class Player:
 		multi-chunk rendering starts some offset (seen below), then does the same
 		"""
 		if tuple([map_y, map_x]) in self.rendered_room_stuff:
-			print(4)
+			# print(4)
 			return
-		print(5)
+		# print(5)
 		chunk:Chunk = self.maze.get_chunk(map_y,map_x)
 		pix_start_y = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_y - self.maze.center[0])
 		pix_start_x = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_x - self.maze.center[1])
@@ -130,7 +130,7 @@ class Player:
 
 
 	def render_manager(self):
-		print("TRIGGERED")
+		# print("TRIGGERED", self.rendered_room_stuff.keys())
 
 		pos_set:set = set([]) # this is for chunk de-rendering
 		
@@ -158,9 +158,10 @@ class Player:
 		self.render_chunk(self.map_position[0]+1, self.map_position[1]-1)
 		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]-1]))
 
-		will_del = set()
+		will_del = set([])
 		for key in self.rendered_room_stuff.keys():
 			if key not in pos_set:
+				# print(key)
 				to_del = self.rendered_room_stuff[key]
 				for tile in to_del:
 					del tile
@@ -183,7 +184,7 @@ class Player:
 			tile_coords:list[int] = self.find_current_tile()
 			tile_coords[0] -= 1
 			current_chunk_y_start = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
-			print(tile_coords,current_chunk_y_start)
+			# print(tile_coords,current_chunk_y_start)
 
 			if tile_coords[0] < current_chunk_y_start:
 				self.update_map_position(-1, 0)
@@ -220,7 +221,7 @@ class Player:
 			tile_coords:list[int] = self.find_current_tile()
 			tile_coords[0] += 1
 			current_chunk_y_end = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
-			print(tile_coords,current_chunk_y_end)
+			# print(tile_coords,current_chunk_y_end)
 
 			if tile_coords[0] > current_chunk_y_end: # might need to change to a >=, but this works so it's fine
 				self.update_map_position(1, 0)
@@ -257,7 +258,7 @@ class Player:
 			tile_coords:list[int] = self.find_current_tile()
 			tile_coords[1] -= 1
 			current_chunk_x_start = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
-			print(tile_coords,current_chunk_x_start)
+			# print(tile_coords,current_chunk_x_start)
 
 			if tile_coords[1] < current_chunk_x_start:
 				self.update_map_position(0, -1)
@@ -265,7 +266,7 @@ class Player:
 
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-				print("ow my liver")
+				# print("ow my liver")
 				return
 			
 		# Add trail at current position before moving
@@ -285,19 +286,6 @@ class Player:
 
 		scene.camera.pos = player.sprite.pos
 		self.last_hor_move_right = False
-	def move_right(self):
-
-		if self.sprite.x % TILE_LEN == 0:
-			tile_coords:list[int] = self.find_current_tile()
-			tile_coords[1] += 1
-			current_chunk_x_end = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
-			print(tile_coords,current_chunk_x_end)
-
-			if tile_coords[1] > current_chunk_x_end:
-				self.update_map_position(0, 1)
-
-
-			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 
 
 
@@ -307,7 +295,7 @@ class Player:
 			tile_coords:list[int] = self.find_current_tile()
 			tile_coords[1] += 1
 			current_chunk_x_end = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
-			print(tile_coords,current_chunk_x_end)
+			# print(tile_coords,current_chunk_x_end)
 
 			if tile_coords[1] > current_chunk_x_end:
 				self.update_map_position(0, 1)
@@ -364,23 +352,23 @@ class Player:
 		tile_coords = self.find_current_tile()
 		chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 
-		print(f"Attack: tile_coords={tile_coords}, direction={self.direction}")
+		# print(f"Attack: tile_coords={tile_coords}, direction={self.direction}")
 
 		front_wall = False
 		if self.direction == 180:  # facing left
-			print(f"Checking left tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]+1].wall}")
+			# print(f"Checking left tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]+1].wall}")
 			if chunk.grid[tile_coords[1]][tile_coords[0]+1].wall:
 				front_wall = True
 		elif self.direction == 90:  # facing up
-			print(f"Checking up tile wall: {chunk.grid[tile_coords[1]-1][tile_coords[0]].wall}")
+			# print(f"Checking up tile wall: {chunk.grid[tile_coords[1]-1][tile_coords[0]].wall}")
 			if chunk.grid[tile_coords[1]-1][tile_coords[0]].wall:
 				front_wall = True
 		elif self.direction == 0:  # facing right
-			print(f"Checking right tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]-1].wall}")
+			# print(f"Checking right tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]-1].wall}")
 			if chunk.grid[tile_coords[1]][tile_coords[0]-1].wall:
 				front_wall = True
 		elif self.direction == 270:  # facing down
-			print(f"Checking down tile wall: {chunk.grid[tile_coords[1]+1][tile_coords[0]].wall}")
+			# print(f"Checking down tile wall: {chunk.grid[tile_coords[1]+1][tile_coords[0]].wall}")
 			if chunk.grid[tile_coords[1]+1][tile_coords[0]].wall:
 				front_wall = True
 

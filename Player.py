@@ -98,12 +98,18 @@ class Player:
 			if chunk.grid[tile_coords[1]-1][tile_coords[0]].wall:
 				return
 
+		# Add trail at current position before moving
+		trail = scene.layers[0].add_rect(
+			width=10,
+			height=10,
+			pos=(self.sprite.x, self.sprite.y),
+			color=(1, 0, 0, 0.3),  # Red with transparency
+		)
+		
 		new_y = self.sprite.y - 10
 		if not self.check_collision(self.sprite.x, new_y):
-			player.attacking = 1
 			self.sprite.y = new_y
 			self.direction = 90
-			player.attacking = 0
 
 		scene.camera.pos = player.sprite.pos
 		self.last_ver_move_up = True
@@ -117,12 +123,18 @@ class Player:
 			if chunk.grid[tile_coords[1]+1][tile_coords[0]].wall:
 				return
 
+		# Add trail at current position before moving
+		trail = scene.layers[0].add_rect(
+			width=10,
+			height=10,
+			pos=(self.sprite.x, self.sprite.y),
+			color=(1, 0, 0, 0.3),  # Red with transparency
+		)
+		
 		new_y = self.sprite.y + 10
 		if not self.check_collision(self.sprite.x, new_y):
-			player.attacking = 1
 			self.sprite.y = new_y
 			self.direction = 270
-			player.attacking = 0
 		
 
 		scene.camera.pos = player.sprite.pos
@@ -137,12 +149,18 @@ class Player:
 			if chunk.grid[tile_coords[1]][tile_coords[0]-1].wall:
 				return
 			
+		# Add trail at current position before moving
+		trail = scene.layers[0].add_rect(
+			width=10,
+			height=10,
+			pos=(self.sprite.x, self.sprite.y),
+			color=(1, 0, 0, 0.3),  # Red with transparency
+		)
+		
 		new_x = self.sprite.x - 10
 		if not self.check_collision(new_x, self.sprite.y):
-			player.attacking = 1
 			self.sprite.x = new_x
 			self.direction = 0
-			player.attacking = 0
 
 		scene.camera.pos = player.sprite.pos
 		self.last_hor_move_right = False
@@ -156,12 +174,18 @@ class Player:
 			if chunk.grid[tile_coords[1]][tile_coords[0]+1].wall:
 				return
 			
+		# Add trail at current position before moving
+		trail = scene.layers[0].add_rect(
+			width=10,
+			height=10,
+			pos=(self.sprite.x, self.sprite.y),
+			color=(1, 0, 0, 0.3),  # Red with transparency
+		)
+		
 		new_x = self.sprite.x + 10
 		if not self.check_collision(new_x, self.sprite.y):
-			player.attacking = 1
 			self.sprite.x = new_x
 			self.direction = 180
-			player.attacking = 0
 		
 
 		scene.camera.pos = player.sprite.pos
@@ -231,7 +255,6 @@ class Player:
 			return True
 		else:
 			return False
-
 
 player = Player()
 # Bind movement functions to arrow keys

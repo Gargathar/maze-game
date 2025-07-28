@@ -293,11 +293,11 @@ def update():
 	elif player.attacking == 0:
 		if player.up_pressed:
 			player.move_up()
-		if player.down_pressed:
+		elif player.down_pressed:
 			player.move_down()
-		if player.left_pressed:
+		elif player.left_pressed:
 			player.move_left()
-		if player.right_pressed:
+		elif player.right_pressed:
 			player.move_right()
 	else:
 		pass

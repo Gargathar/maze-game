@@ -1,4 +1,4 @@
-import math
+
 import sys
 sys.dont_write_bytecode = True
 # This is a holy warding spell, one that is required for my computer for some stupid reason
@@ -7,6 +7,7 @@ sys.dont_write_bytecode = True
 
 import wasabi2d as w2d
 import time
+import math
 
 from chunk_generation import Chunk, Cell
 from maze_as_a_whole import Maze
@@ -30,7 +31,7 @@ class Player:
 		self.sprite = scene.layers[1].add_rect(
 			width=TILE_LEN,
 			height=TILE_LEN,
-			pos=(400, 300),
+			pos=(50, 50),
 			color=(1, 0, 0),  # Red color
 		)
 
@@ -73,11 +74,35 @@ class Player:
 					color=(1, 1, 1),  # White
 					)
 					tile_set.add(tile)
+	
+
+	def find_current_tile(self):
+		print(self.sprite.x / 50)
+		print(self.sprite.y / 50)
+		if self.sprite.x % 50 == 0:
+			tile_x = int(round(self.sprite.x / 50))
+		if self.sprite.y % 50 == 0:
+			tile_y = int(round(self.sprite.y / 50))
+		
+		print(f"called | {self.sprite.x} -> {tile_x} | {self.sprite.y} -> {tile_y} |")
+		
+		return [tile_x, tile_y]
 
 
 	
 	# Define movement functions
 	def move_up(self):
+
+		if self.sprite.y % TILE_LEN == 0:
+			tile_coords:list[int] = self.find_current_tile()
+			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			chunk.print_chunk()
+			print(tile_coords, chunk.grid[tile_coords[0]][tile_coords[1]-1].wall)
+			if chunk.grid[tile_coords[0]][tile_coords[1]-1].wall:
+				return
+
+
+
 		new_y = self.sprite.y - 10
 		if not self.check_collision(self.sprite.x, new_y):
 			self.sprite.y = new_y
@@ -152,20 +177,21 @@ class Player:
 		#     time.sleep(0.1)
 		# time.sleep(5)
 		# Remove the sword after the attack
+
 	def check_collision(self, new_x, new_y):
-		
+		pass
 		
     	
 		
-		tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
-		tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
-		chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-		cell = chunk.grid[tile_y][tile_x]
+		# tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
+		# tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
+		# chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+		# cell = chunk.grid[tile_y][tile_x]
 
-		if not cell.wall:
-			return True
-		else:
-			return False
+		# if not cell.wall:
+		# 	return True
+		# else:
+		# 	return False
 
 
 player = Player()
@@ -211,9 +237,11 @@ def on_key_up(key):
 			for _ in range(4):
 				scene.camera.pos = player.sprite.pos
 				if player.last_hor_move_right == True:
-					player.sprite.x += 10
+					player.move_right()
+					time.sleep(1/60)
 				else:
-					player.sprite.x -= 10
+					player.move_left()
+					time.sleep(1/60)
 
 				if player.sprite.x % TILE_LEN == 0:
 					break
@@ -223,9 +251,11 @@ def on_key_up(key):
 			for _ in range(4):
 				scene.camera.pos = player.sprite.pos
 				if player.last_ver_move_up == True:
-					player.sprite.y -= 10
+					player.move_up()
+					time.sleep(1/60)
 				else:
-					player.sprite.y += 10
+					player.move_down()
+					time.sleep(1/60)
 
 				if player.sprite.y % TILE_LEN == 0:
 					break

@@ -23,7 +23,7 @@ class Player:
 	def __init__(self):
 
 		self.maze = Maze()
-		self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2]
+		self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2] # [Y, X], NOT THE OTHER WAY AROUND!!!!!
 
 		self.rendered_room_stuff:list[set[Cell]] = []
 		
@@ -97,11 +97,8 @@ class Player:
 			tile_coords:list[int] = self.find_current_tile()
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 			chunk.print_chunk()
-			print(tile_coords, chunk.grid[tile_coords[0]][tile_coords[1]-1].wall)
-			if chunk.grid[tile_coords[0]][tile_coords[1]-1].wall:
+			if chunk.grid[tile_coords[1]-1][tile_coords[0]].wall:
 				return
-
-
 
 		new_y = self.sprite.y - 10
 		if not self.check_collision(self.sprite.x, new_y):
@@ -114,6 +111,14 @@ class Player:
 		self.last_ver_move_up = True
 
 	def move_down(self):
+
+		if self.sprite.y % TILE_LEN == 0:
+			tile_coords:list[int] = self.find_current_tile()
+			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			chunk.print_chunk()
+			if chunk.grid[tile_coords[1]+1][tile_coords[0]].wall:
+				return
+
 		new_y = self.sprite.y + 10
 		if not self.check_collision(self.sprite.x, new_y):
 			player.attacking = 1
@@ -126,6 +131,14 @@ class Player:
 		self.last_ver_move_up = False
 
 	def move_left(self):
+
+		if self.sprite.x % TILE_LEN == 0:
+			tile_coords:list[int] = self.find_current_tile()
+			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			chunk.print_chunk()
+			if chunk.grid[tile_coords[1]][tile_coords[0]-1].wall:
+				return
+			
 		new_x = self.sprite.x - 10
 		if not self.check_collision(new_x, self.sprite.y):
 			player.attacking = 1
@@ -137,6 +150,14 @@ class Player:
 		self.last_hor_move_right = False
 
 	def move_right(self):
+
+		if self.sprite.x % TILE_LEN == 0:
+			tile_coords:list[int] = self.find_current_tile()
+			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			chunk.print_chunk()
+			if chunk.grid[tile_coords[1]][tile_coords[0]+1].wall:
+				return
+			
 		new_x = self.sprite.x + 10
 		if not self.check_collision(new_x, self.sprite.y):
 			player.attacking = 1

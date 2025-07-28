@@ -7,20 +7,18 @@ sys.dont_write_bytecode = True
 import wasabi2d as w2d
 import time
 import math
-
+from pewpew import Orb
 from chunk_generation import Chunk, Cell
 from maze_as_a_whole import Maze
 
 # Create a new scene
 scene = w2d.Scene(width=800, height=600, background=(0, 0, 0), title="My Scene")
 animate = w2d.animate 
-
 TILE_LEN = 50
 
 class Player:
 	
 	def __init__(self):
-
 		self.maze = Maze()
 		self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2] # [Y, X], NOT THE OTHER WAY AROUND!!!!!
 
@@ -48,6 +46,47 @@ class Player:
 		self.direction = 0
 		self.last_ver_move_up:bool = True
 		self.last_hor_move_right:bool = True
+
+		# Orb feature attributes
+		self.orb_types = [
+			{
+				'name': 'purple',
+				'color': (0.5, 0, 0.5),
+				'cooldown': 0.5,
+				'expand_on_impact': False,
+			},
+			{
+				'name': 'orange',
+				'color': (1, 0.5, 0),
+				'cooldown': 1.0,
+				'expand_on_impact': True,
+			}
+		]
+		self.current_orb_index = 0
+		self.last_orb_time = 0
+		self.active_orbs = []
+
+		# Orb feature attributes
+		self.orb_types = [
+			{
+				'name': 'purple',
+				'color': (0.5, 0, 0.5),
+				'cooldown': 0.5,
+				'expand_on_impact': False,
+			},
+			{
+				'name': 'orange',
+				'color': (1, 0.5, 0),
+				'cooldown': 1.0,
+				'expand_on_impact': True,
+			}
+		]
+		self.current_orb_index = 0
+		self.last_orb_time = 0
+		self.active_orbs = []
+
+
+
 
 
 
@@ -139,115 +178,126 @@ class Player:
 		self.render_manager()
 
 	
-	# Define movement functions
 	def move_up(self):
-
 		if self.sprite.y % TILE_LEN == 0:
-			tile_coords:list[int] = self.find_current_tile()
-			tile_coords[0] -= 1
-			current_chunk_y_start = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
-			print(tile_coords,current_chunk_y_start)
+            tile_coords:list[int] = self.find_current_tile()
+            tile_coords[0] -= 1
+            current_chunk_y_start = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
+            print(tile_coords,current_chunk_y_start)
 
-			if tile_coords[0] < current_chunk_y_start:
-				self.update_map_position(-1, 0)
+            if tile_coords[0] < current_chunk_y_start:
+                self.update_map_position(-1, 0)
 
 				
 
-			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-				return
+            chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+            if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+                return
 
 		# Add trail at current position before moving
-		trail = scene.layers[0].add_rect(
-			width=10,
-			height=10,
-			pos=(self.sprite.x, self.sprite.y),
-			color=(1, 0, 0, 0.3),  # Red with transparency
-		)
+		# trail = scene.layers[0].add_rect(
+		# 	width=10,
+		# 	height=10,
+		# 	pos=(self.sprite.x, self.sprite.y),
+		# 	color=(1, 0, 0, 0.3),  # Red with transparency
+		# )
 		
-		new_y = self.sprite.y - 10
+        new_y = self.sprite.y - 10
 		
-		player.attacking = 1
-		self.sprite.y = new_y
-		self.direction = 90
-		player.attacking = 0
+        player.attacking = 1
+        self.sprite.y = new_y
+        self.direction = 90
+        player.attacking = 0
 
-		scene.camera.pos = player.sprite.pos
-		self.last_ver_move_up = True
-
-
-
-	def move_down(self):
-
-		if self.sprite.y % TILE_LEN == 0:
-			tile_coords:list[int] = self.find_current_tile()
-			tile_coords[0] += 1
-			current_chunk_y_end = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
-			print(tile_coords,current_chunk_y_end)
-
-			if tile_coords[0] > current_chunk_y_end: # might need to change to a >=, but this works so it's fine
-				self.update_map_position(1, 0)
+        scene.camera.pos = player.sprite.pos
+        self.last_ver_move_up = True
 
 
-			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-				return
+
+    def move_down(self):
+
+        if self.sprite.y % TILE_LEN == 0:
+	        tile_coords:list[int] = self.find_current_tile()
+            tile_coords[0] += 1
+            current_chunk_y_end = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
+            print(tile_coords,current_chunk_y_end)
+
+            if tile_coords[0] > current_chunk_y_end: # might need to change to a >=, but this works so it's fine
+                self.update_map_position(1, 0)
+
+
+            chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+            if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+                return
 
 		# Add trail at current position before moving
-		trail = scene.layers[0].add_rect(
-			width=10,
-			height=10,
-			pos=(self.sprite.x, self.sprite.y),
-			color=(1, 0, 0, 0.3),  # Red with transparency
-		)
+		# trail = scene.layers[0].add_rect(
+		# 	width=10,
+		# 	height=10,
+		# 	pos=(self.sprite.x, self.sprite.y),
+		# 	color=(1, 0, 0, 0.3),  # Red with transparency
+		# )
 		
-		new_y = self.sprite.y + 10
+        new_y = self.sprite.y + 10
 
-		player.attacking = 1
-		self.sprite.y = new_y
-		self.direction = 270
-		player.attacking = 0
+        player.attacking = 1
+        self.sprite.y = new_y
+        self.direction = 270
+        player.attacking = 0
 		
 
-		scene.camera.pos = player.sprite.pos
-		self.last_ver_move_up = False
+        scene.camera.pos = player.sprite.pos
+        self.last_ver_move_up = False
 
 
 
-	def move_left(self):
+    def move_left(self):
 
-		if self.sprite.x % TILE_LEN == 0:
-			tile_coords:list[int] = self.find_current_tile()
-			tile_coords[1] -= 1
-			current_chunk_x_start = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
-			print(tile_coords,current_chunk_x_start)
+        if self.sprite.x % TILE_LEN == 0:
+            tile_coords:list[int] = self.find_current_tile()
+            tile_coords[1] -= 1
+            current_chunk_x_start = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
+            print(tile_coords,current_chunk_x_start)
 
-			if tile_coords[1] < current_chunk_x_start:
-				self.update_map_position(0, -1)
+            if tile_coords[1] < current_chunk_x_start:
+	            self.update_map_position(0, -1)
 
 
-			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+            chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+            if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
 				print("ow my liver")
 				return
 			
 		# Add trail at current position before moving
-		trail = scene.layers[0].add_rect(
-			width=10,
-			height=10,
-			pos=(self.sprite.x, self.sprite.y),
-			color=(1, 0, 0, 0.3),  # Red with transparency
-		)
+		# trail = scene.layers[0].add_rect(
+		# 	width=10,
+		# 	height=10,
+		# 	pos=(self.sprite.x, self.sprite.y),
+		# 	color=(1, 0, 0, 0.3),  # Red with transparency
+		# )
 		
 		new_x = self.sprite.x - 10
 
 		player.attacking = 1
 		self.sprite.x = new_x
-		self.direction = 0
+		self.direction = 180
 		player.attacking = 0
 
 		scene.camera.pos = player.sprite.pos
 		self.last_hor_move_right = False
+	def move_right(self):
+
+		if self.sprite.x % TILE_LEN == 0:
+			tile_coords:list[int] = self.find_current_tile()
+			tile_coords[1] += 1
+			current_chunk_x_end = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
+			print(tile_coords,current_chunk_x_end)
+
+			if tile_coords[1] > current_chunk_x_end:
+				self.update_map_position(0, 1)
+
+
+			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 
 
 
@@ -268,12 +318,12 @@ class Player:
 				return
 			
 		# Add trail at current position before moving
-		trail = scene.layers[0].add_rect(
-			width=10,
-			height=10,
-			pos=(self.sprite.x, self.sprite.y),
-			color=(1, 0, 0, 0.3),  # Red with transparency
-		)
+		# trail = scene.layers[0].add_rect(
+		# 	width=10,
+		# 	height=10,
+		# 	pos=(self.sprite.x, self.sprite.y),
+		# 	color=(1, 0, 0, 0.3),  # Red with transparency
+		# )
 		
 		new_x = self.sprite.x + 10
 
@@ -285,6 +335,8 @@ class Player:
 
 		scene.camera.pos = player.sprite.pos
 		self.last_hor_move_right = True
+	# Define movement functions
+
 
 
 
@@ -392,7 +444,9 @@ class Player:
 	# 		return False
 
 player = Player()
-# Bind movement functions to arrow keys
+
+
+
 @w2d.event
 def on_key_down(key):
 	if player.attacking == 1:
@@ -408,6 +462,15 @@ def on_key_down(key):
 			player.right_pressed = True
 		elif key == w2d.keys.SPACE:
 			player.attack()
+		elif key == w2d.keys.X:
+			current_time = time.time()
+			orb_type = player.orb_types[player.current_orb_index]
+			if current_time - player.last_orb_time >= orb_type['cooldown']:
+				new_orb = Orb(player, orb_type)
+				player.active_orbs.append(new_orb)
+				player.last_orb_time = current_time
+		elif key == w2d.keys.E:
+			player.current_orb_index = (player.current_orb_index + 1) % len(player.orb_types)
 	else:
 		print(player.attacking)
 
@@ -467,6 +530,14 @@ def on_key_up(key):
 
 def update():
 	scene.camera.pos = player.sprite.pos
+
+	# Update orbs
+	current_time = time.time()
+	for orb in player.active_orbs[:]:
+		orb.update()
+		if orb.to_delete:
+			player.active_orbs.remove(orb)
+
 	if player.attacking == 1:
 		pass
 	elif player.attacking == 0:

@@ -1,4 +1,3 @@
-
 import sys
 sys.dont_write_bytecode = True
 # This is a holy warding spell, one that is required for my computer for some stupid reason
@@ -195,11 +194,10 @@ class Player:
 
 	# Remove the sword after the attack
 	def attack(self):
-		self.Sword = scene.layers[0].add_rect(
-		width=10,
-		height=50, # should probably re-write in terms of TILE_LEN
+		self.Sword = scene.layers[-1].add_sprite( # should probably re-write in terms of TILE_LEN
+		scale = 1.5,
 		pos=(400, 300),
-		color=('#b8860b'),  # Set the rotation based on the player's direction
+		image="sword.png",  # Set the rotation based on the player's direction
 		# Black color for the sword
 		)
 

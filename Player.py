@@ -199,30 +199,76 @@ class Player:
 		width=10,
 		height=50, # should probably re-write in terms of TILE_LEN
 		pos=(400, 300),
-		color=(1, 0, 1),  # Set the rotation based on the player's direction
+		color=('#b8860b'),  # Set the rotation based on the player's direction
 		# Black color for the sword
 		)
 
 		def on_animation_finished():
 			self.Sword.delete()
 			self.attacking = 0
-
+			# Reset movement flags to stop continuous movement after attack
+			self.up_pressed = False
+			self.down_pressed = False
+			self.left_pressed = False
+			self.right_pressed = False
+		
 		self.attacking = 1
-		if self.Sword.angle == 180:  # Player is facing left
-			self.Sword.pos = (self.sprite.pos - (25, 0))
-			animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=on_animation_finished)
-			
-		elif self.Sword.angle == 90:  # Player is facing up
-			self.Sword.pos = (self.sprite.pos + (0, 25))
-			animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=on_animation_finished)
-			
-		elif self.Sword.angle == 0:  # Player is facing right
-			self.Sword.pos = (self.sprite.pos + (25, 0))
-			animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=on_animation_finished) 
-			
-		elif self.Sword.angle == 270:  # Player is facing down
-			self.Sword.pos = (self.sprite.pos - (0, 25))
-			animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=on_animation_finished)
+
+		# Determine the tile in front of the player based on direction
+		tile_coords = self.find_current_tile()
+		chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+
+		print(f"Attack: tile_coords={tile_coords}, direction={self.direction}")
+
+		front_wall = False
+		if self.direction == 180:  # facing left
+			print(f"Checking left tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]+1].wall}")
+			if chunk.grid[tile_coords[1]][tile_coords[0]+1].wall:
+				front_wall = True
+		elif self.direction == 90:  # facing up
+			print(f"Checking up tile wall: {chunk.grid[tile_coords[1]-1][tile_coords[0]].wall}")
+			if chunk.grid[tile_coords[1]-1][tile_coords[0]].wall:
+				front_wall = True
+		elif self.direction == 0:  # facing right
+			print(f"Checking right tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]-1].wall}")
+			if chunk.grid[tile_coords[1]][tile_coords[0]-1].wall:
+				front_wall = True
+		elif self.direction == 270:  # facing down
+			print(f"Checking down tile wall: {chunk.grid[tile_coords[1]+1][tile_coords[0]].wall}")
+			if chunk.grid[tile_coords[1]+1][tile_coords[0]].wall:
+				front_wall = True
+
+		if front_wall:
+			# Swing sword on opposite side
+			if self.direction == 180:  # facing left, swing right
+				self.Sword.pos = (self.sprite.pos - (25, 0))
+				animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=on_animation_finished)
+			elif self.direction == 90:  # facing up, swing down
+				self.Sword.pos = (self.sprite.pos + (0, 25))
+				animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=on_animation_finished)
+			elif self.direction == 0:  # facing right, swing left
+				self.Sword.pos = (self.sprite.pos + (25, 0))
+				animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=on_animation_finished)
+			elif self.direction == 270:  # facing down, swing up
+				self.Sword.pos = (self.sprite.pos - (0, 25))
+				animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=on_animation_finished)
+		else:
+			# Swing sword normally
+			if self.direction == 180:  # Player is facing left
+				self.Sword.pos = (self.sprite.pos + (25, 0))
+				animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=on_animation_finished)
+				
+			elif self.direction == 90:  # Player is facing up
+				self.Sword.pos = (self.sprite.pos - (0, 25))
+				animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=on_animation_finished)
+				
+			elif self.direction == 0:  # Player is facing right
+				self.Sword.pos = (self.sprite.pos - (25, 0))
+				animate(self.Sword, tween='linear', duration=0.3, angle=3, on_finished=on_animation_finished) 
+				
+			elif self.direction == 270:  # Player is facing down
+				self.Sword.pos = (self.sprite.pos + (0, 25))
+				animate(self.Sword, tween='linear', duration=0.3, angle=-3, on_finished=on_animation_finished)
 
 	def check_collision(self, new_x, new_y):
 		"""

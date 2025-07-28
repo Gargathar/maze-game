@@ -1,3 +1,6 @@
+import sys
+sys.dont_write_bytecode = True
+
 from chunk_generation import Cell, Chunk
 
 def convert(level:list[list[str]]) -> Chunk:

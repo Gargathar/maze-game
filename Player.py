@@ -25,7 +25,9 @@ class Player:
 		self.maze = Maze()
 		self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2] # [Y, X], NOT THE OTHER WAY AROUND!!!!!
 
-		self.rendered_room_stuff:list[set[Cell]] = []
+		self.CHUNKLEN = self.maze.center_chunk.CHUNKLEN
+
+		self.rendered_room_stuff:dict[set[Cell]] = {}
 		
 		# Create a new square sprite for the Player
 		self.sprite = scene.layers[1].add_rect(
@@ -57,12 +59,18 @@ class Player:
 		Single hunk rendering starts at (0,0), then builds right and down
 		multi-chunk rendering starts some offset (seen below), then does the same
 		"""
-		chunk:Chunk = self.maze.map[map_y][map_x]
-		pix_start_y = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_y-self.maze.center[0])
-		pix_start_x = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_y-self.maze.center[1])
+		if tuple([map_y, map_x]) in self.rendered_room_stuff:
+			print(4)
+			return
+		print(5)
+		chunk:Chunk = self.maze.get_chunk(map_y,map_x)
+		pix_start_y = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_y - self.maze.center[0])
+		pix_start_x = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_x - self.maze.center[1])
+		
+		# print(f"{map_y} -> {pix_start_y} | {map_x} -> {pix_start_x} | {self.maze.center}")
 
-		self.rendered_room_stuff.append(set())
-		tile_set = self.rendered_room_stuff[-1]
+		self.rendered_room_stuff[tuple([map_y,map_x])] = set()
+		tile_set = self.rendered_room_stuff[tuple([map_y,map_x])]
 
 		for i in range(chunk.CHUNKLEN):
 			for j in range(chunk.CHUNKLEN):
@@ -77,15 +85,59 @@ class Player:
 	
 
 	def find_current_tile(self):
-		print(self.sprite.x / 50)
-		print(self.sprite.y / 50)
 		tile_x = int(round(self.sprite.x / 50))
 		tile_y = int(round(self.sprite.y / 50))
-	
-		print(f"called | {self.sprite.x} -> {tile_x} | {self.sprite.y} -> {tile_y} |")
 		
-		return [tile_x, tile_y]
+		return [tile_y, tile_x]
 
+
+	def render_manager(self):
+		print("TRIGGERED")
+
+		pos_set:set = set([]) # this is for chunk de-rendering
+		
+		# the chunk you're in
+		self.render_chunk(self.map_position[0], self.map_position[1])
+		pos_set.add(tuple([self.map_position[0], self.map_position[1]]))
+
+		# the chunks directly around you
+		self.render_chunk(self.map_position[0]-1, self.map_position[1])
+		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]]))
+		self.render_chunk(self.map_position[0]+1, self.map_position[1])
+		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]]))
+		self.render_chunk(self.map_position[0], self.map_position[1]-1)
+		pos_set.add(tuple([self.map_position[0], self.map_position[1]-1]))
+		self.render_chunk(self.map_position[0], self.map_position[1]+1)
+		pos_set.add(tuple([self.map_position[0], self.map_position[1]+1]))
+
+		# the chunks diagonally around you
+		self.render_chunk(self.map_position[0]+1, self.map_position[1]+1)
+		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]+1]))
+		self.render_chunk(self.map_position[0]-1, self.map_position[1]+1)
+		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]+1]))
+		self.render_chunk(self.map_position[0]-1, self.map_position[1]-1)
+		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]-1]))
+		self.render_chunk(self.map_position[0]+1, self.map_position[1]-1)
+		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]-1]))
+
+		will_del = set()
+		for key in self.rendered_room_stuff.keys():
+			if key not in pos_set:
+				to_del = self.rendered_room_stuff[key]
+				for tile in to_del:
+					del tile
+				will_del.add(key)
+		
+		for key in will_del:
+			del self.rendered_room_stuff[key]
+				
+
+
+	def update_map_position(self, y, x):
+		self.map_position[0] += y
+		self.map_position[1] += x
+
+		self.render_manager()
 
 	
 	# Define movement functions
@@ -93,75 +145,111 @@ class Player:
 
 		if self.sprite.y % TILE_LEN == 0:
 			tile_coords:list[int] = self.find_current_tile()
+			tile_coords[0] -= 1
+			current_chunk_y_start = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
+			print(tile_coords,current_chunk_y_start)
+
+			if tile_coords[0] < current_chunk_y_start:
+				self.update_map_position(-1, 0)
+
+				
+
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			chunk.print_chunk()
-			if chunk.grid[tile_coords[1]-1][tile_coords[0]].wall:
+			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
 				return
 
 		new_y = self.sprite.y - 10
-		if not self.check_collision(self.sprite.x, new_y):
-			player.attacking = 1
-			self.sprite.y = new_y
-			self.direction = 90
-			player.attacking = 0
+		
+		player.attacking = 1
+		self.sprite.y = new_y
+		self.direction = 90
+		player.attacking = 0
 
 		scene.camera.pos = player.sprite.pos
 		self.last_ver_move_up = True
+
+
 
 	def move_down(self):
 
 		if self.sprite.y % TILE_LEN == 0:
 			tile_coords:list[int] = self.find_current_tile()
+			tile_coords[0] += 1
+			current_chunk_y_end = ((self.map_position[0]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
+			print(tile_coords,current_chunk_y_end)
+
+			if tile_coords[0] > current_chunk_y_end: # might need to change to a >=, but this works so it's fine
+				self.update_map_position(1, 0)
+
+
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			chunk.print_chunk()
-			if chunk.grid[tile_coords[1]+1][tile_coords[0]].wall:
+			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
 				return
 
 		new_y = self.sprite.y + 10
-		if not self.check_collision(self.sprite.x, new_y):
-			player.attacking = 1
-			self.sprite.y = new_y
-			self.direction = 270
-			player.attacking = 0
+
+		player.attacking = 1
+		self.sprite.y = new_y
+		self.direction = 270
+		player.attacking = 0
 		
 
 		scene.camera.pos = player.sprite.pos
 		self.last_ver_move_up = False
 
+
+
 	def move_left(self):
 
 		if self.sprite.x % TILE_LEN == 0:
 			tile_coords:list[int] = self.find_current_tile()
+			tile_coords[1] -= 1
+			current_chunk_x_start = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN)
+			print(tile_coords,current_chunk_x_start)
+
+			if tile_coords[1] < current_chunk_x_start:
+				self.update_map_position(0, -1)
+
+
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			chunk.print_chunk()
-			if chunk.grid[tile_coords[1]][tile_coords[0]-1].wall:
+			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+				print("ow my liver")
 				return
 			
 		new_x = self.sprite.x - 10
-		if not self.check_collision(new_x, self.sprite.y):
-			player.attacking = 1
-			self.sprite.x = new_x
-			self.direction = 0
-			player.attacking = 0
+
+		player.attacking = 1
+		self.sprite.x = new_x
+		self.direction = 0
+		player.attacking = 0
 
 		scene.camera.pos = player.sprite.pos
 		self.last_hor_move_right = False
+
+
 
 	def move_right(self):
 
 		if self.sprite.x % TILE_LEN == 0:
 			tile_coords:list[int] = self.find_current_tile()
+			tile_coords[1] += 1
+			current_chunk_x_end = ((self.map_position[1]-(self.CHUNKLEN//2)) * self.CHUNKLEN) + self.CHUNKLEN
+			print(tile_coords,current_chunk_x_end)
+
+			if tile_coords[1] > current_chunk_x_end:
+				self.update_map_position(0, 1)
+
+
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			chunk.print_chunk()
-			if chunk.grid[tile_coords[1]][tile_coords[0]+1].wall:
+			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
 				return
 			
 		new_x = self.sprite.x + 10
-		if not self.check_collision(new_x, self.sprite.y):
-			player.attacking = 1
-			self.sprite.x = new_x
-			self.direction = 180
-			player.attacking = 0
+
+		player.attacking = 1
+		self.sprite.x = new_x
+		self.direction = 180
+		player.attacking = 0
 		
 
 		scene.camera.pos = player.sprite.pos
@@ -205,32 +293,32 @@ class Player:
 		# time.sleep(5)
 		# Remove the sword after the attack
 
-	def check_collision(self, new_x, new_y):
-		"""
-		Checks whether the player's next move will result in a collision with a wall.
+	# def check_collision(self, new_x, new_y):
+	# 	"""
+	# 	Checks whether the player's next move will result in a collision with a wall.
 
-		Args:
-			new_x (int): The new x-coordinate of the player.
-			new_y (int): The new y-coordinate of the player.
+	# 	Args:
+	# 		new_x (int): The new x-coordinate of the player.
+	# 		new_y (int): The new y-coordinate of the player.
 
-		Returns:
-			bool: True if there is a collision, False otherwise.
-		"""
-		# Calculate the tile coordinates of the player's next move
-		tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
-		tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
+	# 	Returns:
+	# 		bool: True if there is a collision, False otherwise.
+	# 	"""
+	# 	# Calculate the tile coordinates of the player's next move
+	# 	tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
+	# 	tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
 		
-		# Get the chunk that the player is currently in
-		chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+	# 	# Get the chunk that the player is currently in
+	# 	chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 		
-		# Get the cell that the player is trying to move into
-		cell = chunk.grid[tile_y][tile_x]
+	# 	# Get the cell that the player is trying to move into
+	# 	cell = chunk.grid[tile_y][tile_x]
 		
-		# Check if the cell is a wall
-		if cell.wall:
-			return True
-		else:
-			return False
+	# 	# Check if the cell is a wall
+	# 	if cell.wall:
+	# 		return True
+	# 	else:
+	# 		return False
 
 
 player = Player()
@@ -329,5 +417,5 @@ def update():
 # Run the scene
 
 update()
-player.render_chunk(15,15)
+player.render_manager()
 w2d.run()

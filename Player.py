@@ -81,11 +81,7 @@ class Player:
 		print(self.sprite.y / 50)
 		tile_x = int(round(self.sprite.x / 50))
 		tile_y = int(round(self.sprite.y / 50))
-<<<<<<< HEAD
 	
-=======
-		
->>>>>>> c2a242d13e1685f1054bf2204bdbb63aa400c953
 		print(f"called | {self.sprite.x} -> {tile_x} | {self.sprite.y} -> {tile_y} |")
 		
 		return [tile_x, tile_y]

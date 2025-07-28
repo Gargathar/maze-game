@@ -81,7 +81,11 @@ class Player:
 		print(self.sprite.y / 50)
 		tile_x = int(round(self.sprite.x / 50))
 		tile_y = int(round(self.sprite.y / 50))
+<<<<<<< HEAD
 	
+=======
+		
+>>>>>>> c2a242d13e1685f1054bf2204bdbb63aa400c953
 		print(f"called | {self.sprite.x} -> {tile_x} | {self.sprite.y} -> {tile_y} |")
 		
 		return [tile_x, tile_y]
@@ -217,20 +221,20 @@ class Player:
 			bool: True if there is a collision, False otherwise.
 		"""
 		# Calculate the tile coordinates of the player's next move
-		# tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
-		# tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
+		tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
+		tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
 		
-		# # Get the chunk that the player is currently in
-		# chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+		# Get the chunk that the player is currently in
+		chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 		
-		# # Get the cell that the player is trying to move into
-		# cell = chunk.grid[tile_y][tile_x]
+		# Get the cell that the player is trying to move into
+		cell = chunk.grid[tile_y][tile_x]
 		
-		# # Check if the cell is a wall
-		# if cell.wall:
-		# 	return True
-		# else:
-		# 	return False
+		# Check if the cell is a wall
+		if cell.wall:
+			return True
+		else:
+			return False
 
 
 player = Player()

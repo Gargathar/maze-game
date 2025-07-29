@@ -16,6 +16,7 @@ import threading
 #   \  //      \\  /
 #  ][ - - -  - - - ][  
 
+from music import MusicPlayer
 from pewpew import Orb
 from chunk_generation import Chunk, Cell
 from maze_as_a_whole import Maze
@@ -24,6 +25,9 @@ from maze_as_a_whole import Maze
 scene = w2d.Scene(width=800, height=600, background=(0, 0, 0), title="My Scene")
 animate = w2d.animate 
 TILE_LEN = 50
+
+music_player = MusicPlayer()
+music_player.start()
 
 class Player:
 	

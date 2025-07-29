@@ -74,6 +74,12 @@ class Chunk:
 		
 		build_maze()
 
+		self.grid[0][mid].wall = False
+		self.grid[mid][0].wall = False
+		self.grid[self.CHUNKLEN-1][mid].wall = False
+		self.grid[mid][self.CHUNKLEN-1].wall = False
+
+
 
 
 

@@ -29,3 +29,13 @@ class Maze:
 		self.center_chunk = Chunk()
 
 		self.map[self.MAP_LEN//2][self.MAP_LEN//2] = self.center_chunk
+
+
+
+	def get_chunk(self, y, x):
+		
+		if self.map[y][x] == "UNEXPLORED":
+			self.map[y][x] = Chunk()
+		return self.map[y][x]
+
+		

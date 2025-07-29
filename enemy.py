@@ -146,7 +146,7 @@ def update(dt):
 	enemy.x += dx
 	enemy.y += dy
 	print(player.health)
-	if fabs(player.sprite.x - enemy.x) < 50 and fabs(player.sprite.y - enemy.y) < 50 and a_timer.elapsed():
+	if fabs(player.sprite.x - enemy.x) < 25 and fabs(player.sprite.y - enemy.y) < 25 and a_timer.elapsed():
 		player.health-=2
 	# w2d.clock.schedule(update, 1/60)
 

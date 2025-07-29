@@ -3,6 +3,7 @@ sys.dont_write_bytecode = True
 # This is a holy warding spell, one that is required for my computer for some stupid reason
 # Please place it at the top of each new file, such that I may remain protected
 
+import gc
 
 import wasabi2d as w2d
 import time
@@ -164,11 +165,15 @@ class Player:
 				# print(key)
 				to_del = self.rendered_room_stuff[key]
 				for tile in to_del:
-					del tile
+					tile.delete()
 				will_del.add(key)
 		
 		for key in will_del:
+			print(self.rendered_room_stuff[key])
 			del self.rendered_room_stuff[key]
+		
+		
+		gc.collect()
 				
 
 

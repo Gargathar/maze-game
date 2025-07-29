@@ -8,6 +8,14 @@ import wasabi2d as w2d
 import time
 import math
 
+#          ][
+#     - - -/\- - -
+#][ /-_ _ /  \ _ _-\ ][
+import threading 
+#  |    /_/  \_\    |
+#   \  //      \\  /
+#  ][ - - -  - - - ][  
+
 from pewpew import Orb
 from chunk_generation import Chunk, Cell
 from maze_as_a_whole import Maze
@@ -93,13 +101,24 @@ class Player:
 		for i in range(chunk.CHUNKLEN):
 			for j in range(chunk.CHUNKLEN):
 				if chunk.grid[i][j].wall == True:
-					tile = scene.layers[0].add_rect(
-					width=TILE_LEN,
-					height=TILE_LEN,
-					pos=(pix_start_x + (TILE_LEN*j), pix_start_y + (TILE_LEN*i)),
-					color=(1, 1, 1),  # White
+					# tile = scene.layers[0].add_rect(
+					# width=TILE_LEN,
+					# height=TILE_LEN,
+					# pos=(pix_start_x + (TILE_LEN*j), pix_start_y + (TILE_LEN*i)),
+					# color=(1, 1, 1),  # White
+					# )
+					tile = scene.layers[0].add_sprite(
+						scale = 1,
+						pos = (pix_start_x + (TILE_LEN*j), pix_start_y + (TILE_LEN*i)),
+						image = "pixil-frame-0-8.png", #if_this_doesnt_work_i_swear_to_god.png
 					)
-					tile_set.add(tile)
+				else:
+					tile = scene.layers[0].add_sprite(
+						scale = 1,
+						pos = (pix_start_x + (TILE_LEN*j), pix_start_y + (TILE_LEN*i)),
+						image = "pixil-frame-0-9.png", #if_this_doesnt_work_i_swear_to_god.png
+					)
+				tile_set.add(tile)
 	
 	
 	
@@ -438,6 +457,13 @@ class Player:
 			return True
 		else:
 			return False
+
+
+
+
+
+
+
 
 player = Player()
 

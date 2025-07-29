@@ -1,7 +1,5 @@
 import sys
 sys.dont_write_bytecode = True
-import sys
-sys.dont_write_bytecode = True
 
 from chunk_generation import Cell, Chunk
 
@@ -17,7 +15,3 @@ def convert(level:list[list[str]]) -> Chunk:
             if level[i][j] == '..':
                 cur.wall = False
     return chunk
-
-if __name__ == '__main__':
-    ch = convert([['..','##'],['##','..']])
-    ch.print_chunk()

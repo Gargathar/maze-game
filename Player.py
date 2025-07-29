@@ -20,7 +20,7 @@ class Player:
 	
 	def __init__(self):
 		self.maze = Maze()
-		self.scene = scene
+		self.health=10
 		self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2] # [Y, X], NOT THE OTHER WAY AROUND!!!!!
 
 		self.CHUNKLEN = self.maze.center_chunk.CHUNKLEN
@@ -557,7 +557,7 @@ def update():
 
 
 # Run the scene
-
-update()
-player.render_manager()
-w2d.run()
+if __name__ == '__main__':
+	update()
+	player.render_manager()
+	w2d.run()

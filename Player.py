@@ -23,6 +23,7 @@ class Player:
 	def __init__(self):
 
 		self.maze = Maze()
+		self.scene = scene
 		self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2] # [Y, X], NOT THE OTHER WAY AROUND!!!!!
 
 		self.rendered_room_stuff:list[set[Cell]] = []
@@ -94,7 +95,7 @@ class Player:
 		if self.sprite.y % TILE_LEN == 0:
 			tile_coords:list[int] = self.find_current_tile()
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			chunk.print_chunk()
+			# chunk.print_chunk()
 			if chunk.grid[tile_coords[1]-1][tile_coords[0]].wall:
 				return
 
@@ -119,7 +120,7 @@ class Player:
 		if self.sprite.y % TILE_LEN == 0:
 			tile_coords:list[int] = self.find_current_tile()
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			chunk.print_chunk()
+			# chunk.print_chunk()
 			if chunk.grid[tile_coords[1]+1][tile_coords[0]].wall:
 				return
 
@@ -145,7 +146,7 @@ class Player:
 		if self.sprite.x % TILE_LEN == 0:
 			tile_coords:list[int] = self.find_current_tile()
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			chunk.print_chunk()
+			# chunk.print_chunk()
 			if chunk.grid[tile_coords[1]][tile_coords[0]-1].wall:
 				return
 			
@@ -170,7 +171,7 @@ class Player:
 		if self.sprite.x % TILE_LEN == 0:
 			tile_coords:list[int] = self.find_current_tile()
 			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
-			chunk.print_chunk()
+			# chunk.print_chunk()
 			if chunk.grid[tile_coords[1]][tile_coords[0]+1].wall:
 				return
 			

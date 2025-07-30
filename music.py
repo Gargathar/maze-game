@@ -4,7 +4,7 @@ import os
 import random
 
 class MusicPlayer:
-    def __init__(self, music_folder="music"):
+    def __init__(self, music_folder="Music"):
         self.music_folder = music_folder
         self.playlist = []
         self.current_track_index = -1

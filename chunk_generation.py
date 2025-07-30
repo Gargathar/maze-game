@@ -26,7 +26,7 @@ class Cell:
 
 class Chunk:
 
-	def __init__(self, wall_to_use=None):
+	def __init__(self, wall_to_use=None, brick=False):
 
 		self.CHUNKLEN:int = 31 # this assumes the grid is a uniform square
 		mid:int = self.CHUNKLEN//2
@@ -73,8 +73,8 @@ class Chunk:
 			mid = self.CHUNKLEN//2
 			vis = [[False for _ in range(mid)] for _ in range(mid)]
 			dfs(0, 0, vis)
-		
-		build_maze()
+		if brick == False: # just in case
+			build_maze()
 
 		self.grid[0][mid].wall = False
 		self.grid[mid][0].wall = False

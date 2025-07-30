@@ -27,7 +27,7 @@ animate = w2d.animate
 TILE_LEN = 50
 
 music_player = MusicPlayer()
-# music_player.start()
+music_player.start()
 
 class Player:
 	
@@ -80,6 +80,15 @@ class Player:
 		self.last_orb_time = 0
 		self.active_orbs = []
 
+		
+		# game progression flags
+		self.up_flag:bool = False
+		self.down_flag:bool = False
+		self.left_flag:bool = False
+		self.right_flag:bool = False
+		self.end_flag:bool = False
+		
+
 
 		self.health = 10
 
@@ -96,7 +105,10 @@ class Player:
 		"""
 		if tuple([map_y, map_x]) in self.rendered_room_stuff:
 			return
-		chunk:Chunk = self.maze.get_chunk(map_y,map_x)
+		if (map_y in range(self.maze.MAP_LEN)) and (map_x in range(self.maze.MAP_LEN)):	
+			chunk:Chunk = self.maze.get_chunk(map_y,map_x)
+		else:
+			chunk = Chunk("pixil-frame-0-13.png", brick=True)
 		pix_start_y = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_y - self.maze.center[0])
 		pix_start_x = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_x - self.maze.center[1])
 		
@@ -141,30 +153,25 @@ class Player:
 
 	def render_manager(self):
 		pos_set:set = set([]) # this is for chunk de-rendering
+
+		def bob_the_builder(y,x):
+			self.render_chunk(y,x)
+			pos_set.add(tuple([y, x]))
 		
 		# the chunk you're in
-		self.render_chunk(self.map_position[0], self.map_position[1])
-		pos_set.add(tuple([self.map_position[0], self.map_position[1]]))
+		bob_the_builder(self.map_position[0], self.map_position[1])
 
 		# the chunks directly around you
-		self.render_chunk(self.map_position[0]-1, self.map_position[1])
-		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]]))
-		self.render_chunk(self.map_position[0]+1, self.map_position[1])
-		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]]))
-		self.render_chunk(self.map_position[0], self.map_position[1]-1)
-		pos_set.add(tuple([self.map_position[0], self.map_position[1]-1]))
-		self.render_chunk(self.map_position[0], self.map_position[1]+1)
-		pos_set.add(tuple([self.map_position[0], self.map_position[1]+1]))
+		bob_the_builder(self.map_position[0]-1, self.map_position[1])
+		bob_the_builder(self.map_position[0]+1, self.map_position[1])
+		bob_the_builder(self.map_position[0], self.map_position[1]-1)
+		bob_the_builder(self.map_position[0], self.map_position[1]+1)
 
 		# the chunks diagonally around you
-		self.render_chunk(self.map_position[0]+1, self.map_position[1]+1)
-		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]+1]))
-		self.render_chunk(self.map_position[0]-1, self.map_position[1]+1)
-		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]+1]))
-		self.render_chunk(self.map_position[0]-1, self.map_position[1]-1)
-		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]-1]))
-		self.render_chunk(self.map_position[0]+1, self.map_position[1]-1)
-		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]-1]))
+		bob_the_builder(self.map_position[0]+1, self.map_position[1]+1)
+		bob_the_builder(self.map_position[0]-1, self.map_position[1]+1)
+		bob_the_builder(self.map_position[0]-1, self.map_position[1]-1)
+		bob_the_builder(self.map_position[0]+1, self.map_position[1]-1)
 
 		will_del = set()
 		for key in self.rendered_room_stuff.keys():
@@ -454,6 +461,7 @@ class Player:
 		Returns:
 			bool: True if there is a collision, False otherwise.
 		"""
+		# return False # DEBUG
 		# Calculate the tile coordinates of the player's next move
 		tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
 		tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)

@@ -44,7 +44,7 @@ class Player:
 		self.sprite = scene.layers[1].add_rect(
 			width=TILE_LEN,
 			height=TILE_LEN,
-			pos=(50, 50),
+			pos=(TILE_LEN * (self.CHUNKLEN//2), TILE_LEN * (self.CHUNKLEN//2)),
 			color=(1, 0, 0),  # Red color
 		)
 
@@ -112,10 +112,17 @@ class Player:
 					# pos=(pix_start_x + (TILE_LEN*j), pix_start_y + (TILE_LEN*i)),
 					# color=(1, 1, 1),  # White
 					# )
-					tile = scene.layers[0].add_sprite(
+					if chunk.wall_to_use == None:	
+						tile = scene.layers[0].add_sprite(
+							scale = 1,
+							pos = (pix_start_x + (TILE_LEN*j), pix_start_y + (TILE_LEN*i)),
+							image = "pixil-frame-0-8.png", #if_this_doesnt_work_i_swear_to_god.png
+						)
+					else:
+						tile = scene.layers[0].add_sprite(
 						scale = 1,
 						pos = (pix_start_x + (TILE_LEN*j), pix_start_y + (TILE_LEN*i)),
-						image = "pixil-frame-0-8.png", #if_this_doesnt_work_i_swear_to_god.png
+						image = chunk.wall_to_use, #if_this_doesnt_work_i_swear_to_god.png
 					)
 				else:
 					tile = scene.layers[0].add_sprite(

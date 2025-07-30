@@ -3,8 +3,8 @@ sys.dont_write_bytecode = True
 
 from chunk_generation import Cell, Chunk
 
-def convert(level:list[list[str]]) -> Chunk:
-    chunk = Chunk()
+def convert(level:list[list[str]], wall_to_use=None) -> Chunk:
+    chunk = Chunk(wall_to_use)
     size = len(level)
     chunk.grid = []
     for i in range(size):

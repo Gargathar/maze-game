@@ -8,6 +8,9 @@ sys.dont_write_bytecode = True
 from chunk_generation import Cell, Chunk
 import wasabi2d as w2d
 
+from grid_to_chunk import convert
+import structures as maps
+
 
 class Maze:
 
@@ -26,9 +29,14 @@ class Maze:
 		
 		self.center = [self.MAP_LEN//2,self.MAP_LEN//2]
 
-		self.center_chunk = Chunk()
+		self.center_chunk = convert(maps.concentric,"pixil-frame-0-11.png")
 
 		self.map[self.MAP_LEN//2][self.MAP_LEN//2] = self.center_chunk
+
+		self.map[self.MAP_LEN//2][5] = convert(maps.pillars, "pixil-frame-0-12.png")
+		self.map[self.MAP_LEN//2][26] = convert(maps.technicalluy_this_is_a_real_labyrinth, "pixil-frame-0-12.png")
+
+		self.map[0][0] = convert(maps.ow_my_liver, "pixil-frame-0-10.png")
 
 
 

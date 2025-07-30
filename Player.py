@@ -27,7 +27,7 @@ animate = w2d.animate
 TILE_LEN = 50
 
 music_player = MusicPlayer()
-music_player.start()
+# music_player.start()
 
 class Player:
 	

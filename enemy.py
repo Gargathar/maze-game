@@ -6,7 +6,6 @@ from math import fabs
 import time
 from pewpew import Orb
 
-enemy = scene.layers[1].add_circle(radius=10, pos=(150,150), color='yellow')
 TILE_LEN=50
 
 # Same as in Player.py
@@ -100,13 +99,15 @@ class Timer:
 			self.start = cur
 			return True
 		return False
-class Velocity():
-	def __init__(self):
-		self.dx=-1
-		self.dy=-1
+class Enemy():
+	def __init__(self, pos, player, scene):
+		self.dx, self.dy=-1,-1
+		self.player = player
+		self.sprite = scene.layers[1].add_circle(radius=10, pos=pos, color='yellow')
 v=1
 a_timer = Timer(3)
-vel = Velocity()
+enemy = Enemy((150,150), player, scene)
+sprite = enemy.sprite
 @w2d.event
 def update(dt):
 	scene.camera.pos = player.sprite.pos
@@ -131,22 +132,22 @@ def update(dt):
 	else:
 		pass
 	# Enemy code continues
-	x, y = enemy.x, enemy.y
-	dx, dy = vel.dx, vel.dy
-	cell_x, cell_y, new_cell_x, new_cell_y = int((x + TILE_LEN/2) // TILE_LEN), int((y + TILE_LEN/2) // TILE_LEN), int((x + dx + TILE_LEN/2) // TILE_LEN), int((y + dy + TILE_LEN/2) // TILE_LEN)
+	x, y = sprite.x, sprite.y
+	dx, dy = enemy.dx, enemy.dy
+	cell_x, cell_y, new_cell_x, new_cell_y = int((x + 25) // 50), int((y + 25) // 50), int((x + dx + 25) // 50), int((y + dy + 25) // 50)
 	chunk = player.maze.map[player.map_position[0]][player.map_position[1]]
 	if chunk.grid[new_cell_y%31][new_cell_x%31].wall:
-		vel.dx, vel.dy = v * (player.sprite.x - enemy.x) * dt, v * (player.sprite.y - enemy.y) * dt
+		enemy.dx, enemy.dy = v * (player.sprite.x - sprite.x) * dt, v * (player.sprite.y - sprite.y) * dt
 		if cell_x == new_cell_x:
-			dx=0
+			# dx=0
 			dy*=-1
 		else:
-			dy=0
+			# dy=0
 			dx*=-1
-	enemy.x += dx
-	enemy.y += dy
+	sprite.x += dx
+	sprite.y += dy
 	print(player.health)
-	if fabs(player.sprite.x - enemy.x) < 25 and fabs(player.sprite.y - enemy.y) < 25 and a_timer.elapsed():
+	if fabs(player.sprite.x - sprite.x) < 25 and fabs(player.sprite.y - sprite.y) < 25 and a_timer.elapsed():
 		player.health-=2
 	# w2d.clock.schedule(update, 1/60)
 

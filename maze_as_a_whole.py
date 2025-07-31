@@ -33,10 +33,10 @@ class Maze:
 
 		self.map[self.MAP_LEN//2][self.MAP_LEN//2] = self.center_chunk
 
-		self.map[self.MAP_LEN//2][self.center[1]-6] = convert(maps.pillars, "pixil-frame-0-12.png")
-		self.map[self.MAP_LEN//2][self.center[1]+7] = convert(maps.technicalluy_this_is_a_real_labyrinth, "pixil-frame-0-12.png")
-		self.map[self.center[0]-6][self.MAP_LEN//2] = convert(maps.comb, "pixil-frame-0-12.png")
-		self.map[self.center[0]+9][self.MAP_LEN//2] = convert(maps.the_big_empty, "pixil-frame-0-12.png")
+		self.map[self.MAP_LEN//2][self.center[1]-8] = convert(maps.pillars, "pixil-frame-0-12.png")
+		self.map[self.MAP_LEN//2][self.center[1]+9] = convert(maps.technicalluy_this_is_a_real_labyrinth, "pixil-frame-0-12.png")
+		self.map[self.center[0]-8][self.MAP_LEN//2] = convert(maps.comb, "pixil-frame-0-12.png")
+		self.map[self.center[0]+11][self.MAP_LEN//2] = convert(maps.the_big_empty, "pixil-frame-0-12.png")
 
 		self.map[0][0] = convert(maps.ow_my_liver, "pixil-frame-0-10.png")
 

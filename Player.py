@@ -27,7 +27,7 @@ animate = w2d.animate
 TILE_LEN = 50
 
 music_player = MusicPlayer()
-# music_player.start()
+music_player.start()
 
 class Player:
 	
@@ -43,10 +43,10 @@ class Player:
 		
 		# Create a new square sprite for the Player
 		self.sprite = scene.layers[1].add_rect(
-			width=TILE_LEN,
-			height=TILE_LEN,
+			width=TILE_LEN * 5/6,
+			height=TILE_LEN * 5/6,
 			pos=(TILE_LEN * (self.CHUNKLEN//2), TILE_LEN * (self.CHUNKLEN//2)),
-			color=(1, 0, 0),  # Red color
+			color=(1,0,0),  # Red color
 		)
 
 		# Set flags for key presses
@@ -81,6 +81,20 @@ class Player:
 		self.last_orb_time = 0
 		self.active_orbs = []
 
+		
+		# game progression flags
+		self.up_flag:bool = False
+		self.down_flag:bool = False
+		self.left_flag:bool = False
+		self.right_flag:bool = False
+		self.end_flag:bool = False
+		
+		self.out_of_map_chunks = [
+			[None,None,None,],
+			[None,None,None,],
+			[None,None,None,],
+		]
+		self.out_of_map_set:set[tuple[int]] = set()
 
 		self.health = 10
 
@@ -88,7 +102,7 @@ class Player:
 
 
 
-	def render_chunk(self, map_y, map_x): 
+	def render_chunk(self, map_y, map_x, chunk:Chunk=None): 
 		"""
 		Here so that there's only one scene to render, despite multiple layers
 		
@@ -96,11 +110,23 @@ class Player:
 		multi-chunk rendering starts some offset (seen below), then does the same
 		"""
 		if tuple([map_y, map_x]) in self.rendered_room_stuff:
-			return
-		chunk:Chunk = self.maze.get_chunk(map_y,map_x)
+			if tuple([map_y, map_x]) not in self.out_of_map_set:
+				return
+		
+		if chunk == None:	
+			chunk:Chunk = self.maze.get_chunk(map_y,map_x)
+		
 		pix_start_y = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_y - self.maze.center[0])
 		pix_start_x = self.maze.center_chunk.CHUNKLEN * TILE_LEN * (map_x - self.maze.center[1])
 		
+
+		if (tuple([map_y,map_x]) in self.rendered_room_stuff) and (tuple([map_y,map_x]) in self.out_of_map_set):
+			to_del = self.rendered_room_stuff[tuple([map_y,map_x])]
+			for tile in to_del:
+				tile.delete()
+			del self.rendered_room_stuff[tuple([map_y,map_x]) ]
+		
+
 		self.rendered_room_stuff[tuple([map_y,map_x])] = set()
 		tile_set = self.rendered_room_stuff[tuple([map_y,map_x])]
 
@@ -142,30 +168,28 @@ class Player:
 
 	def render_manager(self):
 		pos_set:set = set([]) # this is for chunk de-rendering
+
+		def bob_the_builder(y_mod,x_mod):
+			"""
+			*Can he fix it?*
+
+			**YES HE CAN**
+			"""
+			y = self.map_position[0] + y_mod
+			x = self.map_position[1] + x_mod
+			if (y in range(self.maze.MAP_LEN)) and (x in range(self.maze.MAP_LEN)):
+				self.render_chunk(y,x)
+			else:
+				chunk:Chunk = Chunk("pixil-frame-0-13.png")
+				self.out_of_map_set.add(tuple([y,x]))
+				self.render_chunk(y,x,chunk)
+				self.out_of_map_chunks[1 - y_mod][1 - x_mod] = chunk
+			pos_set.add(tuple([y, x]))
 		
-		# the chunk you're in
-		self.render_chunk(self.map_position[0], self.map_position[1])
-		pos_set.add(tuple([self.map_position[0], self.map_position[1]]))
-
-		# the chunks directly around you
-		self.render_chunk(self.map_position[0]-1, self.map_position[1])
-		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]]))
-		self.render_chunk(self.map_position[0]+1, self.map_position[1])
-		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]]))
-		self.render_chunk(self.map_position[0], self.map_position[1]-1)
-		pos_set.add(tuple([self.map_position[0], self.map_position[1]-1]))
-		self.render_chunk(self.map_position[0], self.map_position[1]+1)
-		pos_set.add(tuple([self.map_position[0], self.map_position[1]+1]))
-
-		# the chunks diagonally around you
-		self.render_chunk(self.map_position[0]+1, self.map_position[1]+1)
-		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]+1]))
-		self.render_chunk(self.map_position[0]-1, self.map_position[1]+1)
-		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]+1]))
-		self.render_chunk(self.map_position[0]-1, self.map_position[1]-1)
-		pos_set.add(tuple([self.map_position[0]-1, self.map_position[1]-1]))
-		self.render_chunk(self.map_position[0]+1, self.map_position[1]-1)
-		pos_set.add(tuple([self.map_position[0]+1, self.map_position[1]-1]))
+		# all nine rendering chunks, based on offset from the player
+		for i in range(-1,2):
+			for j in range(-1,2):
+				bob_the_builder(i, j)
 
 		will_del = set()
 		for key in self.rendered_room_stuff.keys():
@@ -179,6 +203,8 @@ class Player:
 			del self.rendered_room_stuff[key]
 		
 				
+
+
 	def find_current_tile(self):
 		tile_x = int(round(self.sprite.x / 50))
 		tile_y = int(round(self.sprite.y / 50))
@@ -224,10 +250,13 @@ class Player:
 				self.update_map_position(-1, 0)
 
 				
+			if self.map_position[0] in range(self.maze.MAP_LEN):
+				chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			else:
+				chunk = self.out_of_map_chunks[1][1]
 
-			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-				return
+				return 
 
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -262,7 +291,11 @@ class Player:
 				self.update_map_position(1, 0)
 
 
-			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			if self.map_position[0] in range(self.maze.MAP_LEN):
+				chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			else:
+				chunk = self.out_of_map_chunks[1][1]
+
 			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
 				return
 
@@ -300,7 +333,11 @@ class Player:
 				self.update_map_position(0, -1)
 
 
-			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			if self.map_position[0] in range(self.maze.MAP_LEN):
+				chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			else:
+				chunk = self.out_of_map_chunks[1][1]
+
 			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
 				print("ow my liver")
 				return
@@ -338,7 +375,11 @@ class Player:
 				self.update_map_position(0, 1)
 
 
-			chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			if self.map_position[0] in range(self.maze.MAP_LEN):
+				chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
+			else:
+				chunk = self.out_of_map_chunks[1][1]
+
 			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
 				return
 			
@@ -455,7 +496,13 @@ class Player:
 		Returns:
 			bool: True if there is a collision, False otherwise.
 		"""
+		# return False # DEBUG
 		# Calculate the tile coordinates of the player's next move
+		if self.map_position[0] not in range(self.maze.MAP_LEN):
+			return
+		if self.map_position[1] not in range(self.maze.MAP_LEN):
+			return
+
 		tile_x = int((new_x + TILE_LEN/ 2) // TILE_LEN)
 		tile_y = int((new_y + TILE_LEN/ 2) // TILE_LEN)
 		

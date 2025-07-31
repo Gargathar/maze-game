@@ -1,10 +1,13 @@
+import sys
+sys.dont_write_bytecode = True
+
 import wasabi2d as w2d
 import wasabi2d.music as w2d_music
 import os
 import random
 
 class MusicPlayer:
-    def __init__(self, music_folder="music"):
+    def __init__(self, music_folder="Music"):
         self.music_folder = music_folder
         self.playlist = []
         self.current_track_index = -1

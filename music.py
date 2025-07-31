@@ -17,26 +17,20 @@ class MusicPlayer:
 
     def load_music_files(self):
         if not os.path.exists(self.music_folder):
-            print(f"Music folder '{self.music_folder}' does not exist.")
+            # print(f"Music folder '{self.music_folder}' does not exist.")
             return
         files = [f for f in os.listdir(self.music_folder) if f.lower().endswith(".ogg")]
         self.playlist = [f.lower() for f in files]
         for i in range(100):
             self.playlist.append(copy.copy(self.playlist[0]))
         random.shuffle(self.playlist)
-        if not self.playlist:
-            print("No music files found in the music folder.")
-        else:
-            print("Loaded playlist:")
-            for track in self.playlist:
-                print(f" - {track}")
 
     def play_next(self):
         if not self.playlist:
             return
         self.current_track_index = (self.current_track_index + 1) % len(self.playlist)
         track = self.playlist[self.current_track_index]
-        print(f"Playing track: {track}")
+        # print(f"Playing track: {track}")
         w2d_music.play_once(track)
         self.is_playing = True
 
@@ -47,7 +41,7 @@ class MusicPlayer:
 
     def start(self):
         if not self.playlist:
-            print("Playlist is empty, cannot start music.")
+            # print("Playlist is empty, cannot start music.")
             return
         self.current_track_index = -1
         self.play_next()

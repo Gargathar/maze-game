@@ -24,7 +24,7 @@ from maze_as_a_whole import Maze
 
 # Create a new scene
 scene = w2d.Scene(width=800, height=600, background=(0, 0, 0), title="My Scene")
-animate = w2d.animate 
+animate = w2d.animate
 TILE_LEN = 50
 
 
@@ -106,6 +106,9 @@ class Player:
 		# 	color=(1,0.5,0),  # orange color
 		# ),
 
+		self.hor_track_list = []
+		self.ver_track_list = []
+
 		
 		self.out_of_map_chunks = [
 			[None,None,None,],
@@ -114,7 +117,19 @@ class Player:
 		]
 		self.out_of_map_set:set[tuple[int]] = set()
 
-		self.health = 10
+
+		self.health = 100
+		self.health_bar = []
+
+		for i in range(0,self.health//2):
+			self.health_bar.append(
+				scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]-365 + (10 * i), scene.camera.pos[1]+265),
+						color=(1,0,0),  # red color
+					)
+			)
 
 	
 	def progression(self, chunk:Chunk):
@@ -422,7 +437,7 @@ class Player:
 
 			if DEBUG_NOCLIP == False:
 				if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-					print("ow my liver")
+					# print("ow my liver") # goodbye, my liver
 					return
 			
 		# Add trail at current position before moving
@@ -517,23 +532,23 @@ class Player:
 		tile_coords = self.find_current_tile()
 		chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 
-		print(f"Attack: tile_coords={tile_coords}, direction={self.direction}")
+		# print(f"Attack: tile_coords={tile_coords}, direction={self.direction}")
 
 		front_wall = False
 		if self.direction == 180:  # facing left
-			print(f"Checking left tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]+1].wall}")
+			# print(f"Checking left tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]+1].wall}")
 			if chunk.grid[tile_coords[1]][tile_coords[0]+1].wall:
 				front_wall = True
 		elif self.direction == 90:  # facing up
-			print(f"Checking up tile wall: {chunk.grid[tile_coords[1]-1][tile_coords[0]].wall}")
+			# print(f"Checking up tile wall: {chunk.grid[tile_coords[1]-1][tile_coords[0]].wall}")
 			if chunk.grid[tile_coords[1]-1][tile_coords[0]].wall:
 				front_wall = True
 		elif self.direction == 0:  # facing right
-			print(f"Checking right tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]-1].wall}")
+			# print(f"Checking right tile wall: {chunk.grid[tile_coords[1]][tile_coords[0]-1].wall}")
 			if chunk.grid[tile_coords[1]][tile_coords[0]-1].wall:
 				front_wall = True
 		elif self.direction == 270:  # facing down
-			print(f"Checking down tile wall: {chunk.grid[tile_coords[1]+1][tile_coords[0]].wall}")
+			# print(f"Checking down tile wall: {chunk.grid[tile_coords[1]+1][tile_coords[0]].wall}")
 			if chunk.grid[tile_coords[1]+1][tile_coords[0]].wall:
 				front_wall = True
 
@@ -669,6 +684,13 @@ class Player:
 		for i in range(len(self.ver_track_list)):
 			self.ver_track_list[i].pos = (scene.camera.pos[0]+365, scene.camera.pos[1]-265 +(10 * i))
 
+		if self.health > 0:
+			while self.health//2 < len(self.health_bar):
+				self.health_bar.pop().delete()
+			
+			for i in range(self.health//2):
+				self.health_bar[i].pos = ((scene.camera.pos[0]-390 + (10 * i)), (scene.camera.pos[1]+285))
+
 				
 		# self.coords_display.pos = (scene.camera.pos[0]+315, scene.camera.pos[1]-265)
 
@@ -750,7 +772,8 @@ def on_key_down(key):
 		elif key == w2d.keys.E:
 			player.current_orb_index = (player.current_orb_index + 1) % len(player.orb_types)
 	else:
-		print(player.attacking)
+		# print(player.attacking)
+		return
 
 
 
@@ -803,17 +826,17 @@ def on_key_up(key):
 	
 
 	else:
-		print(player.attacking)
+		return
 	
 @w2d.event
 def update(dt):
 	
 	player.update_gui()
 
+
 	# player.am_i_in_a_wall()
 
 	# Update orbs
-	current_time = time.time()
 	for orb in player.active_orbs[:]:
 		orb.update()
 		if orb.to_delete:
@@ -849,9 +872,9 @@ def update(dt):
 			dx*=-1
 	sprite.x += dx
 	sprite.y += dy
-	print(player.health)
 	if fabs(player.sprite.x - sprite.x) < 25 and fabs(player.sprite.y - sprite.y) < 25 and a_timer.elapsed():
-		player.health-=2
+		if player.end_flag == False:
+			player.health-=2
 	if player.health==0:
 		player.health=10
 		player.lives-=1

@@ -139,16 +139,19 @@ def update(dt):
 	if chunk.grid[new_cell_y%31][new_cell_x%31].wall:
 		enemy.dx, enemy.dy = v * (player.sprite.x - sprite.x) * dt, v * (player.sprite.y - sprite.y) * dt
 		if cell_x == new_cell_x:
-			# dx=0
+			dx=0
 			dy*=-1
 		else:
-			# dy=0
+			dy=0
 			dx*=-1
 	sprite.x += dx
 	sprite.y += dy
 	print(player.health)
 	if fabs(player.sprite.x - sprite.x) < 25 and fabs(player.sprite.y - sprite.y) < 25 and a_timer.elapsed():
 		player.health-=2
+	if player.health==0:
+		player.health=10
+		player.lives-=1
 	# w2d.clock.schedule(update, 1/60)
 
 # Run the scene

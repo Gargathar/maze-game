@@ -7,6 +7,7 @@ sys.dont_write_bytecode = True
 import wasabi2d as w2d
 import time
 import math
+import copy
 
 #          ][
 #     - - -/\- - -
@@ -28,11 +29,12 @@ TILE_LEN = 50
 
 
 # Debug constants, FOR RELEASE SHOULD ALL BE FALSE
-DEBUG_NOCLIP = True
+DEBUG_NOCLIP = False
+DEBUG_WALLCLIP = True
 
 
 music_player = MusicPlayer()
-# music_player.start()
+music_player.start()
 
 class Player:
 	
@@ -86,7 +88,7 @@ class Player:
 		self.active_orbs = []
 
 		
-		# game progression flags
+		# game progression flags # SET THESE TO FALSE TO START
 		self.up_flag:bool = False
 		self.down_flag:bool = False
 		self.left_flag:bool = False
@@ -101,6 +103,20 @@ class Player:
 		# 	pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
 		# 	color=(1,0.5,0),  # orange color
 		# ),
+		# self.coords_display = scene.layers[5].add_rect(
+		# 	width=TILE_LEN * 3,
+		# 	height=TILE_LEN ,
+		# 	pos=(scene.camera.pos[0] + 275, scene.camera.pos[1] -575),
+		# 	color=(0.5,0.5,0.5),  # gray color
+		# )
+
+		# self.coords_text = scene.layers[6].add_label(
+		# 	"hi",
+		# 	pos = (30,30),
+		# )
+
+		self.hor_track_list = []
+		self.ver_track_list = []
 
 		
 		self.out_of_map_chunks = [
@@ -162,15 +178,16 @@ class Player:
 						)
 				case "center":
 					if self.up_flag and self.down_flag and self.left_flag and self.right_flag:
-						self.progress_squares.append(
-							scene.layers[5].add_rect(
-							width=TILE_LEN * 2/3,
-							height=TILE_LEN * 2/3,
-							pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
-							color=(0.1,1,0.1),  # green color
-						),
-						)
-						self.end_flag = True
+						if self.end_flag == False:
+							self.progress_squares.append(
+								scene.layers[5].add_rect(
+								width=TILE_LEN * 2/3,
+								height=TILE_LEN * 2/3,
+								pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
+								color=(0.1,1,0.1),  # green color
+							),
+							)
+							self.end_flag = True
 	
 
 
@@ -326,7 +343,7 @@ class Player:
 				self.update_map_position(-1, 0)
 
 				
-			if self.map_position[0] in range(self.maze.MAP_LEN):
+			if self.map_position[0] in range(self.maze.MAP_LEN) and self.map_position[1] in range(self.maze.MAP_LEN):
 				chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 			else:
 				chunk = self.out_of_map_chunks[1][1]
@@ -368,7 +385,7 @@ class Player:
 				self.update_map_position(1, 0)
 
 
-			if self.map_position[0] in range(self.maze.MAP_LEN):
+			if self.map_position[0] in range(self.maze.MAP_LEN) and self.map_position[1] in range(self.maze.MAP_LEN):
 				chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 			else:
 				chunk = self.out_of_map_chunks[1][1]
@@ -411,7 +428,7 @@ class Player:
 				self.update_map_position(0, -1)
 
 
-			if self.map_position[0] in range(self.maze.MAP_LEN):
+			if self.map_position[0] in range(self.maze.MAP_LEN) and self.map_position[1] in range(self.maze.MAP_LEN):
 				chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 			else:
 				chunk = self.out_of_map_chunks[1][1]
@@ -454,7 +471,7 @@ class Player:
 				self.update_map_position(0, 1)
 
 
-			if self.map_position[0] in range(self.maze.MAP_LEN):
+			if self.map_position[1] in range(self.maze.MAP_LEN) and self.map_position[1] in range(self.maze.MAP_LEN):
 				chunk:Chunk = self.maze.map[self.map_position[0]][self.map_position[1]]
 			else:
 				chunk = self.out_of_map_chunks[1][1]
@@ -576,6 +593,8 @@ class Player:
 		Returns:
 			bool: True if there is a collision, False otherwise.
 		"""
+		if DEBUG_WALLCLIP == True:
+			return False
 		if DEBUG_NOCLIP == True:
 			return False 
 		# Calculate the tile coordinates of the player's next move
@@ -601,10 +620,88 @@ class Player:
 		
 	
 	def update_gui(self):
+		if player.end_flag:
+			scene.layers[10].add_rect(
+				width=scene.width+100,
+				height=scene.height+100,
+				pos=(scene.camera.pos[0], scene.camera.pos[1]),
+				color=(0.5,0.5,0.5),  # gray color
+			)
+
 		scene.camera.pos = self.sprite.pos
 		for i in range(len(self.progress_squares)):
 			self.progress_squares[i].pos = (scene.camera.pos[0]-375 + (i * TILE_LEN), scene.camera.pos[1]-275) # REMEMBER ME
 		
+
+
+		if len(self.hor_track_list) > (abs(self.map_position[1] - 15)):
+			while len(self.hor_track_list) > (abs(self.map_position[1] - 15)):
+				self.hor_track_list.pop().delete()
+			
+		elif len(self.hor_track_list) < (abs(self.map_position[1] - 15)):
+			while len(self.hor_track_list) < (abs(self.map_position[1] - 15)):
+				if (self.map_position[1] - 15) < 0:
+					self.hor_track_list.append(
+						scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]+315, scene.camera.pos[1]-265),
+						color=(1,0.5,0),  # orange color
+					)
+					)
+				elif (self.map_position[1] - 15) > 0:
+					self.hor_track_list.append(
+						scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]+315, scene.camera.pos[1]-265),
+						color=(0.1,1,0.1),  # green color
+					)
+					)
+		
+		for i in range(len(self.hor_track_list)):
+			self.hor_track_list[i].pos = (scene.camera.pos[0]+315 -(10 * i), scene.camera.pos[1]-265)
+
+
+
+		if len(self.ver_track_list) > (abs(self.map_position[0] - 15)):
+			while len(self.ver_track_list) > (abs(self.map_position[0] - 15)):
+				self.ver_track_list.pop().delete()
+			
+		elif len(self.ver_track_list) < (abs(self.map_position[0] - 15)):
+			while len(self.ver_track_list) < (abs(self.map_position[0] - 15)):
+				if (self.map_position[0] - 15) < 0:
+					self.ver_track_list.append(
+						scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]+365, scene.camera.pos[1]-265),
+						color=(0.2,0.2,1),  # blue color
+					)
+					)
+				elif (self.map_position[0] - 15) > 0:
+					self.ver_track_list.append(
+						scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]+365, scene.camera.pos[1]-265),
+						color=(1,0.3,0.1),  # red color
+					)
+					)
+		
+		for i in range(len(self.ver_track_list)):
+			self.ver_track_list[i].pos = (scene.camera.pos[0]+365, scene.camera.pos[1]-265 +(10 * i))
+
+				
+		# self.coords_display.pos = (scene.camera.pos[0]+315, scene.camera.pos[1]-265)
+
+		# self.coords_text.delete()
+
+		# self.coords_text = scene.layers[5].add_label(
+		# 	text = copy.copy(f"{self.map_position[1]} | {self.map_position[0]}"),
+		# 	fontsize = TILE_LEN - 10,
+		# 	pos = self.coords_display.pos
+		# )
 
 
 
@@ -710,6 +807,8 @@ def on_key_up(key):
 	
 
 def update():
+
+	
 	player.update_gui()
 
 	# player.am_i_in_a_wall()

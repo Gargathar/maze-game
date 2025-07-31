@@ -5,6 +5,7 @@ import wasabi2d as w2d
 import wasabi2d.music as w2d_music
 import os
 import random
+import copy
 
 class MusicPlayer:
     def __init__(self, music_folder="Music"):
@@ -20,6 +21,8 @@ class MusicPlayer:
             return
         files = [f for f in os.listdir(self.music_folder) if f.lower().endswith(".ogg")]
         self.playlist = [f.lower() for f in files]
+        for i in range(100):
+            self.playlist.append(copy.copy(self.playlist[0]))
         random.shuffle(self.playlist)
         if not self.playlist:
             print("No music files found in the music folder.")

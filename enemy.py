@@ -1,5 +1,6 @@
 import sys
 sys.dont_write_bytecode = True
+
 import wasabi2d as w2d
 from Player import player, scene
 from math import fabs

@@ -1,3 +1,5 @@
+import sys
+sys.dont_write_bytecode = True
 
 import wasabi2d as w2d 
 TILE_LEN = 50

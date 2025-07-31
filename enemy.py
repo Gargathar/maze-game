@@ -8,6 +8,7 @@ import time
 from pewpew import Orb
 
 TILE_LEN=50
+ghost = True
 
 class Timer:
 	def __init__(self, dur):
@@ -58,7 +59,9 @@ def update(dt):
 	chunk = player.maze.map[player.map_position[0]][player.map_position[1]]
 	if chunk.grid[new_cell_y%31][new_cell_x%31].wall:
 		enemy.dx, enemy.dy = v * (player.sprite.x - sprite.x) * dt, v * (player.sprite.y - sprite.y) * dt
-		if cell_x == new_cell_x:
+		if ghost:
+			pass
+		elif cell_x == new_cell_x:
 			dx=0
 			dy*=-1
 		else:

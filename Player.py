@@ -6,7 +6,7 @@ sys.dont_write_bytecode = True
 
 import wasabi2d as w2d
 import time
-import math
+from math import fabs
 import copy
 
 #          ][
@@ -30,7 +30,7 @@ TILE_LEN = 50
 
 # Debug constants, FOR RELEASE SHOULD ALL BE FALSE
 DEBUG_NOCLIP = False
-DEBUG_WALLCLIP = True
+DEBUG_WALLCLIP = False
 
 
 music_player = MusicPlayer()
@@ -39,6 +39,7 @@ music_player.start()
 class Player:
 	
 	def __init__(self):
+		self.last_update_call = time.time()
 		self.maze = Maze()
 		self.health=10
 		self.lives=5
@@ -351,7 +352,7 @@ class Player:
 
 			if DEBUG_NOCLIP == False:
 				if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-					return # DEBUG
+					return
 
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -709,10 +710,33 @@ class Player:
 
 
 
-
-
-
 player = Player()
+
+
+
+
+GHOST = True
+
+class Timer:
+	def __init__(self, dur):
+		self.start=-dur
+		self.dur = dur
+	def elapsed(self):
+		cur = time.time()
+		if cur - self.start >= self.dur:
+			self.start = cur
+			return True
+		return False
+class Enemy():
+	def __init__(self, pos, player, scene):
+		self.dx, self.dy=-1,-1
+		self.player = player
+		self.sprite = scene.layers[1].add_circle(radius=10, pos=pos, color='yellow')
+v=1
+a_timer = Timer(3)
+enemy = Enemy((150,150), player, scene)
+sprite = enemy.sprite
+
 
 
 
@@ -806,9 +830,8 @@ def on_key_up(key):
 	else:
 		print(player.attacking)
 	
-
-def update():
-
+@w2d.event
+def update(dt):
 	
 	player.update_gui()
 
@@ -834,12 +857,34 @@ def update():
 			player.move_right()
 	else:
 		pass
-	w2d.clock.schedule(update, 1/60)
+	# Enemy code continues
+	x, y = sprite.x, sprite.y
+	dx, dy = enemy.dx, enemy.dy
+	cell_x, cell_y, new_cell_x, new_cell_y = int((x + 25) // 50), int((y + 25) // 50), int((x + dx + 25) // 50), int((y + dy + 25) // 50)
+	chunk = player.maze.map[player.map_position[0]][player.map_position[1]]
+	if chunk.grid[new_cell_y%31][new_cell_x%31].wall:
+		enemy.dx, enemy.dy = v * (player.sprite.x - sprite.x) * dt, v * (player.sprite.y - sprite.y) * dt
+		if GHOST:
+			pass
+		elif cell_x == new_cell_x:
+			dx=0
+			dy*=-1
+		else:
+			dy=0
+			dx*=-1
+	sprite.x += dx
+	sprite.y += dy
+	print(player.health)
+	if fabs(player.sprite.x - sprite.x) < 25 and fabs(player.sprite.y - sprite.y) < 25 and a_timer.elapsed():
+		player.health-=2
+	if player.health==0:
+		player.health=10
+		player.lives-=1
 
 
 
 # Run the scene
 if __name__ == '__main__':
-	update()
+	update(0)
 	player.render_manager()
 	w2d.run()

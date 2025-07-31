@@ -26,8 +26,13 @@ scene = w2d.Scene(width=800, height=600, background=(0, 0, 0), title="My Scene")
 animate = w2d.animate 
 TILE_LEN = 50
 
+
+# Debug constants, FOR RELEASE SHOULD ALL BE FALSE
+DEBUG_NOCLIP = True
+
+
 music_player = MusicPlayer()
-music_player.start()
+# music_player.start()
 
 class Player:
 	
@@ -87,6 +92,16 @@ class Player:
 		self.left_flag:bool = False
 		self.right_flag:bool = False
 		self.end_flag:bool = False
+
+		 # a list of small sprites to show progress in the gui
+		self.progress_squares = []
+		# scene.layers[5].add_rect(
+		# 	width=TILE_LEN * 2/3,
+		# 	height=TILE_LEN * 2/3,
+		# 	pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
+		# 	color=(1,0.5,0),  # orange color
+		# ),
+
 		
 		self.out_of_map_chunks = [
 			[None,None,None,],
@@ -97,6 +112,66 @@ class Player:
 
 		self.health = 10
 
+	
+	def progression(self, chunk:Chunk):
+		if chunk.special_story_stuff != None:
+			match chunk.special_story_stuff:
+				case "up":
+					if self.up_flag != True:
+						self.up_flag = True
+						self.progress_squares.append(
+							scene.layers[5].add_rect(
+							width=TILE_LEN * 2/3,
+							height=TILE_LEN * 2/3,
+							pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
+							color=(1,0.5,0),  # orange color
+						),
+						)
+				case "down":
+					if self.down_flag != True:
+						self.down_flag = True
+						self.progress_squares.append(
+							scene.layers[5].add_rect(
+							width=TILE_LEN * 2/3,
+							height=TILE_LEN * 2/3,
+							pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
+							color=(1,0.5,0),  # orange color
+						),
+						)
+				case "left":
+					if self.left_flag != True:
+						self.left_flag = True
+						self.progress_squares.append(
+							scene.layers[5].add_rect(
+							width=TILE_LEN * 2/3,
+							height=TILE_LEN * 2/3,
+							pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
+							color=(1,0.5,0),  # orange color
+						),
+						)
+				case "right":
+					if self.right_flag != True:
+						self.right_flag = True
+						self.progress_squares.append(
+							scene.layers[5].add_rect(
+							width=TILE_LEN * 2/3,
+							height=TILE_LEN * 2/3,
+							pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
+							color=(1,0.5,0),  # orange color
+						),
+						)
+				case "center":
+					if self.up_flag and self.down_flag and self.left_flag and self.right_flag:
+						self.progress_squares.append(
+							scene.layers[5].add_rect(
+							width=TILE_LEN * 2/3,
+							height=TILE_LEN * 2/3,
+							pos=(scene.camera.pos[0]-275, scene.camera.pos[1]-575),
+							color=(0.1,1,0.1),  # green color
+						),
+						)
+						self.end_flag = True
+	
 
 
 
@@ -170,14 +245,16 @@ class Player:
 
 		def bob_the_builder(y_mod,x_mod):
 			"""
-			*Can he fix it?*
+			*Can we fix it?*
 
-			**YES HE CAN**
+			**YES WE CAN**
 			"""
 			y = self.map_position[0] + y_mod
 			x = self.map_position[1] + x_mod
 			if (y in range(self.maze.MAP_LEN)) and (x in range(self.maze.MAP_LEN)):
 				self.render_chunk(y,x)
+				if y_mod == 0 and x_mod == 0:
+					self.progression(self.maze.map[y][x])
 			else:
 				chunk:Chunk = Chunk("pixil-frame-0-13.png")
 				self.out_of_map_set.add(tuple([y,x]))
@@ -216,7 +293,7 @@ class Player:
 		if player.sprite.x % TILE_LEN != 0:
 			pos = self.find_current_tile()
 			if self.maze.map[self.map_position[0]][self.map_position[1]].grid[pos[0] % self.CHUNKLEN][pos[1] % self.CHUNKLEN].wall:
-				scene.camera.pos = player.sprite.pos
+				player.update_gui()
 				if player.last_hor_move_right == True:
 					player.sprite.x -= 50
 					#time.sleep(1/60)
@@ -224,7 +301,7 @@ class Player:
 					player.sprite.y -= 50
 					#time.sleep(1/60)
 
-				scene.camera.pos = player.sprite.pos
+				player.update_gui()
 
 		
 		
@@ -254,8 +331,9 @@ class Player:
 			else:
 				chunk = self.out_of_map_chunks[1][1]
 
-			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-				return 
+			if DEBUG_NOCLIP == False:
+				if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+					return # DEBUG
 
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -272,7 +350,7 @@ class Player:
 			self.direction = 90
 			player.attacking = 0
 
-		scene.camera.pos = player.sprite.pos
+		player.update_gui()
 		self.last_ver_move_up = True
 
 
@@ -295,8 +373,9 @@ class Player:
 			else:
 				chunk = self.out_of_map_chunks[1][1]
 
-			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-				return
+			if DEBUG_NOCLIP == False:
+				if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+					return
 
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -314,7 +393,7 @@ class Player:
 			player.attacking = 0
 		
 
-		scene.camera.pos = player.sprite.pos
+		player.update_gui()
 		self.last_ver_move_up = False
 
 
@@ -337,9 +416,10 @@ class Player:
 			else:
 				chunk = self.out_of_map_chunks[1][1]
 
-			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-				print("ow my liver")
-				return
+			if DEBUG_NOCLIP == False:
+				if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+					print("ow my liver")
+					return
 			
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -356,7 +436,7 @@ class Player:
 			self.direction = 180
 			player.attacking = 0
 
-		scene.camera.pos = player.sprite.pos
+		player.update_gui()
 		self.last_hor_move_right = False
 		
 
@@ -379,8 +459,9 @@ class Player:
 			else:
 				chunk = self.out_of_map_chunks[1][1]
 
-			if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-				return
+			if DEBUG_NOCLIP == False:
+				if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
+					return
 			
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -398,7 +479,7 @@ class Player:
 			player.attacking = 0
 		
 
-		scene.camera.pos = player.sprite.pos
+		player.update_gui()
 		self.last_hor_move_right = True
 
 
@@ -495,7 +576,8 @@ class Player:
 		Returns:
 			bool: True if there is a collision, False otherwise.
 		"""
-		# return False # DEBUG
+		if DEBUG_NOCLIP == True:
+			return False 
 		# Calculate the tile coordinates of the player's next move
 		if self.map_position[0] not in range(self.maze.MAP_LEN):
 			return
@@ -516,6 +598,14 @@ class Player:
 			return True
 		else:
 			return False
+		
+	
+	def update_gui(self):
+		scene.camera.pos = self.sprite.pos
+		for i in range(len(self.progress_squares)):
+			self.progress_squares[i].pos = (scene.camera.pos[0]-375 + (i * TILE_LEN), scene.camera.pos[1]-275) # REMEMBER ME
+		
+
 
 
 
@@ -586,7 +676,7 @@ def on_key_up(key):
 
 		if player.sprite.x % TILE_LEN != 0:
 			for _ in range(4):
-				scene.camera.pos = player.sprite.pos
+				player.update_gui()
 				if player.last_hor_move_right == True:
 					player.move_right()
 					#time.sleep(1/60)
@@ -596,11 +686,11 @@ def on_key_up(key):
 
 				if player.sprite.x % TILE_LEN == 0:
 					break
-				scene.camera.pos = player.sprite.pos
+				player.update_gui()
 		
 		if player.sprite.y % TILE_LEN != 0:
 			for _ in range(4):
-				scene.camera.pos = player.sprite.pos
+				player.update_gui()
 				if player.last_ver_move_up == True:
 					player.move_up()
 					#time.sleep(1/60)
@@ -610,7 +700,7 @@ def on_key_up(key):
 
 				if player.sprite.y % TILE_LEN == 0:
 					break
-				scene.camera.pos = player.sprite.pos
+				player.update_gui()
 
 
 	
@@ -620,7 +710,7 @@ def on_key_up(key):
 	
 
 def update():
-	scene.camera.pos = player.sprite.pos
+	player.update_gui()
 
 	# player.am_i_in_a_wall()
 

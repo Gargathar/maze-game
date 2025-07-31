@@ -26,7 +26,7 @@ class Cell:
 
 class Chunk:
 
-	def __init__(self, wall_to_use=None, brick=False):
+	def __init__(self, wall_to_use:str=None, brick:bool=False, story:str=None):
 
 		self.CHUNKLEN:int = 31 # this assumes the grid is a uniform square
 		mid:int = self.CHUNKLEN//2
@@ -34,7 +34,9 @@ class Chunk:
 		self.dir:list = [[1,0],[-1,0],[0,1],[0,-1]]
 		self.grid:list = []
 
-		self.wall_to_use = wall_to_use
+		self.special_story_stuff:str = story
+
+		self.wall_to_use:str = wall_to_use
 
 		for i in range(self.CHUNKLEN):
 			self.grid.append([])

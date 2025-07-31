@@ -5,7 +5,7 @@ sys.dont_write_bytecode = True
 # Please place it at the top of each new file, such that I may remain protected
 
 
-from random import shuffle
+from random import shuffle, randint
 
 class Cell:
 
@@ -74,7 +74,7 @@ class Chunk:
 		def build_maze(): # involved in dfs building
 			mid = self.CHUNKLEN//2
 			vis = [[False for _ in range(mid)] for _ in range(mid)]
-			dfs(0, 0, vis)
+			dfs(randint(0, mid-1), randint(0, mid-1), vis)
 		if brick == False: # just in case
 			build_maze()
 

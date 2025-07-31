@@ -746,5 +746,4 @@ def update():
 if __name__ == '__main__':
 	update()
 	player.render_manager()
-	player.lives=0
 	w2d.run()

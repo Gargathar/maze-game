@@ -6,7 +6,8 @@ sys.dont_write_bytecode = True
 
 import wasabi2d as w2d
 import time
-import math
+from math import fabs
+import copy
 
 #          ][
 #     - - -/\- - -
@@ -29,6 +30,7 @@ TILE_LEN = 50
 
 # Debug constants, FOR RELEASE SHOULD ALL BE FALSE
 DEBUG_NOCLIP = False
+DEBUG_WALLCLIP = False
 
 
 music_player = MusicPlayer()
@@ -37,6 +39,7 @@ music_player = MusicPlayer()
 class Player:
 	
 	def __init__(self):
+		self.last_update_call = time.time()
 		self.maze = Maze()
 		self.health=10
 		self.lives=5
@@ -334,7 +337,7 @@ class Player:
 
 			if DEBUG_NOCLIP == False:
 				if chunk.grid[tile_coords[0] % self.CHUNKLEN][tile_coords[1] % self.CHUNKLEN].wall:
-					return # DEBUG
+					return
 
 		# Add trail at current position before moving
 		# trail = scene.layers[0].add_rect(
@@ -608,7 +611,74 @@ class Player:
 		
 
 
+		if len(self.hor_track_list) > (abs(self.map_position[1] - 15)):
+			while len(self.hor_track_list) > (abs(self.map_position[1] - 15)):
+				self.hor_track_list.pop().delete()
+			
+		elif len(self.hor_track_list) < (abs(self.map_position[1] - 15)):
+			while len(self.hor_track_list) < (abs(self.map_position[1] - 15)):
+				if (self.map_position[1] - 15) < 0:
+					self.hor_track_list.append(
+						scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]+315, scene.camera.pos[1]-265),
+						color=(1,0.5,0),  # orange color
+					)
+					)
+				elif (self.map_position[1] - 15) > 0:
+					self.hor_track_list.append(
+						scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]+315, scene.camera.pos[1]-265),
+						color=(0.1,1,0.1),  # green color
+					)
+					)
+		
+		for i in range(len(self.hor_track_list)):
+			self.hor_track_list[i].pos = (scene.camera.pos[0]+315 -(10 * i), scene.camera.pos[1]-265)
 
+
+
+		if len(self.ver_track_list) > (abs(self.map_position[0] - 15)):
+			while len(self.ver_track_list) > (abs(self.map_position[0] - 15)):
+				self.ver_track_list.pop().delete()
+			
+		elif len(self.ver_track_list) < (abs(self.map_position[0] - 15)):
+			while len(self.ver_track_list) < (abs(self.map_position[0] - 15)):
+				if (self.map_position[0] - 15) < 0:
+					self.ver_track_list.append(
+						scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]+365, scene.camera.pos[1]-265),
+						color=(0.2,0.2,1),  # blue color
+					)
+					)
+				elif (self.map_position[0] - 15) > 0:
+					self.ver_track_list.append(
+						scene.layers[10].add_rect(
+						width=10,
+						height=10,
+						pos=(scene.camera.pos[0]+365, scene.camera.pos[1]-265),
+						color=(1,0.3,0.1),  # red color
+					)
+					)
+		
+		for i in range(len(self.ver_track_list)):
+			self.ver_track_list[i].pos = (scene.camera.pos[0]+365, scene.camera.pos[1]-265 +(10 * i))
+
+				
+		# self.coords_display.pos = (scene.camera.pos[0]+315, scene.camera.pos[1]-265)
+
+		# self.coords_text.delete()
+
+		# self.coords_text = scene.layers[5].add_label(
+		# 	text = copy.copy(f"{self.map_position[1]} | {self.map_position[0]}"),
+		# 	fontsize = TILE_LEN - 10,
+		# 	pos = self.coords_display.pos
+		# )
 
 
 
@@ -616,6 +686,32 @@ class Player:
 
 
 player = Player()
+
+
+
+
+GHOST = True
+
+class Timer:
+	def __init__(self, dur):
+		self.start=-dur
+		self.dur = dur
+	def elapsed(self):
+		cur = time.time()
+		if cur - self.start >= self.dur:
+			self.start = cur
+			return True
+		return False
+class Enemy():
+	def __init__(self, pos, player, scene):
+		self.dx, self.dy=-1,-1
+		self.player = player
+		self.sprite = scene.layers[1].add_circle(radius=10, pos=pos, color='yellow')
+v=1
+a_timer = Timer(3)
+enemy = Enemy((150,150), player, scene)
+sprite = enemy.sprite
+
 
 
 
@@ -709,8 +805,9 @@ def on_key_up(key):
 	else:
 		print(player.attacking)
 	
-
-def update():
+@w2d.event
+def update(dt):
+	
 	player.update_gui()
 
 	# player.am_i_in_a_wall()
@@ -735,15 +832,34 @@ def update():
 			player.move_right()
 	else:
 		pass
-	w2d.clock.schedule(update, 1/60)
-	if player.lives==0:
-		scene.layers[2].add_rect(width=scene.width, height = scene.height, pos=player.sprite.pos, color='red')
-	# scene.layers[0].add_label(text=f'Pos: {player.sprite.pos}', pos=player.sprite.pos, align='left')
+	# Enemy code continues
+	x, y = sprite.x, sprite.y
+	dx, dy = enemy.dx, enemy.dy
+	cell_x, cell_y, new_cell_x, new_cell_y = int((x + 25) // 50), int((y + 25) // 50), int((x + dx + 25) // 50), int((y + dy + 25) // 50)
+	chunk = player.maze.map[player.map_position[0]][player.map_position[1]]
+	if chunk.grid[new_cell_y%31][new_cell_x%31].wall:
+		enemy.dx, enemy.dy = v * (player.sprite.x - sprite.x) * dt, v * (player.sprite.y - sprite.y) * dt
+		if GHOST:
+			pass
+		elif cell_x == new_cell_x:
+			dx=0
+			dy*=-1
+		else:
+			dy=0
+			dx*=-1
+	sprite.x += dx
+	sprite.y += dy
+	print(player.health)
+	if fabs(player.sprite.x - sprite.x) < 25 and fabs(player.sprite.y - sprite.y) < 25 and a_timer.elapsed():
+		player.health-=2
+	if player.health==0:
+		player.health=10
+		player.lives-=1
 
 
 
 # Run the scene
 if __name__ == '__main__':
-	update()
+	update(0)
 	player.render_manager()
 	w2d.run()

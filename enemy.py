@@ -8,7 +8,7 @@ import time
 from pewpew import Orb
 
 TILE_LEN=50
-ghost = True
+ghost = False
 
 class Timer:
 	def __init__(self, dur):

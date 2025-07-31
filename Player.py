@@ -28,7 +28,7 @@ TILE_LEN = 50
 
 
 # Debug constants, FOR RELEASE SHOULD ALL BE FALSE
-DEBUG_NOCLIP = True
+DEBUG_NOCLIP = False
 
 
 music_player = MusicPlayer()

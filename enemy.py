@@ -71,7 +71,7 @@ def update(dt):
 	sprite.y += dy
 	print(player.health)
 	if fabs(player.sprite.x - sprite.x) < 25 and fabs(player.sprite.y - sprite.y) < 25 and a_timer.elapsed():
-		player.health-=2
+		player.health-=1
 	if player.health==0:
 		player.health=10
 		player.lives-=1

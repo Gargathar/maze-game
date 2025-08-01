@@ -42,7 +42,7 @@ class Player:
 		self.last_update_call = time.time()
 		self.maze = Maze()
 		self.health=10
-		self.lives=5
+		self.lives=1
 		self.map_position = [self.maze.MAP_LEN//2, self.maze.MAP_LEN//2] # [Y, X], NOT THE OTHER WAY AROUND!!!!!
 
 		self.CHUNKLEN = self.maze.center_chunk.CHUNKLEN
@@ -118,15 +118,15 @@ class Player:
 		self.out_of_map_set:set[tuple[int]] = set()
 
 
-		self.health = 100
+		self.health = 157
 		self.health_bar = []
 
-		for i in range(0,self.health//2):
+		for i in range(self.health):
 			self.health_bar.append(
 				scene.layers[10].add_rect(
-						width=10,
+						width=5,
 						height=10,
-						pos=(scene.camera.pos[0]-365 + (10 * i), scene.camera.pos[1]+265),
+						pos=(scene.camera.pos[0]-365 + (5 * i), scene.camera.pos[1]+265),
 						color=(1,0,0),  # red color
 					)
 			)
@@ -685,11 +685,11 @@ class Player:
 			self.ver_track_list[i].pos = (scene.camera.pos[0]+365, scene.camera.pos[1]-265 +(10 * i))
 
 		if self.health > 0:
-			while self.health//2 < len(self.health_bar):
+			while self.health < len(self.health_bar):
 				self.health_bar.pop().delete()
 			
-			for i in range(self.health//2):
-				self.health_bar[i].pos = ((scene.camera.pos[0]-390 + (10 * i)), (scene.camera.pos[1]+285))
+			for i in range(self.health):
+				self.health_bar[i].pos = ((scene.camera.pos[0]-390 + (5 * i)), (scene.camera.pos[1]+285))
 
 				
 		# self.coords_display.pos = (scene.camera.pos[0]+315, scene.camera.pos[1]-265)
@@ -874,7 +874,7 @@ def update(dt):
 	sprite.y += dy
 	if fabs(player.sprite.x - sprite.x) < 25 and fabs(player.sprite.y - sprite.y) < 25 and a_timer.elapsed():
 		if player.end_flag == False:
-			player.health-=2
+			player.health-=1
 	if player.health==0:
 		player.health=10
 		player.lives-=1
